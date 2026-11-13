@@ -1,0 +1,286 @@
+<Page
+    x:Class="Com.VibeCode.CourseRec.Views.EditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Com.VibeCode.CourseRec.Controls"
+    xmlns:models="using:Com.VibeCode.CourseRec.Models">
+
+    <Grid>
+        <ScrollViewer Padding="{StaticResource PageContentPadding}">
+        <StackPanel Spacing="16">
+            <!-- Header & Open Button -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock x:Uid="EditorPageTitle" Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock x:Uid="EditorPageSubtitle" Style="{StaticResource PageSubtitleTextStyle}" />
+                </StackPanel>
+                <Button
+                    Grid.Column="1"
+                    x:Uid="BtnOpenVideoFile"
+                    IsEnabled="{x:Bind ViewModel.CanOpenVideo, Mode=OneWay}"
+                    VerticalAlignment="Center"
+                    Click="OnOpenVideoFileClicked" />
+            </Grid>
+
+            <InfoBar
+                x:Name="StatusInfoBar"
+                IsOpen="{x:Bind ViewModel.IsBannerOpen, Mode=TwoWay}"
+                Message="{x:Bind ViewModel.BannerMessage, Mode=OneWay}"
+                Severity="{x:Bind ViewModel.BannerSeverity, Mode=OneWay}" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.CompletedExportVisibility, Mode=OneWay}">
+                <Button x:Uid="BtnOpenCompletedExport" Command="{x:Bind ViewModel.OpenCompletedExportCommand}" />
+                <Button x:Uid="BtnRevealCompletedExport" Command="{x:Bind ViewModel.RevealCompletedExportCommand}" />
+            </StackPanel>
+
+            <!-- Export Progress Bar -->
+            <Border
+                Visibility="{x:Bind ViewModel.ExportProgressVisibility, Mode=OneWay}"
+                Style="{StaticResource SubtlePanelBorderStyle}">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsExporting, Mode=OneWay}" Width="20" Height="20" />
+                        <TextBlock Text="{x:Bind ViewModel.LoadedVideoTitle, Mode=OneWay}" Style="{StaticResource BodyPrimaryTextStyle}" />
+                    </StackPanel>
+                    <ProgressBar
+                        Minimum="0"
+                        Maximum="100"
+                        Value="{x:Bind ViewModel.ExportProgressPercent, Mode=OneWay}" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.ExportProgressText, Mode=OneWay}"
+                        Style="{StaticResource CaptionSecondaryTextStyle}" />
+                    <Button
+                        x:Uid="BtnCancelExport"
+                        HorizontalAlignment="Left"
+                        Command="{x:Bind ViewModel.CancelExportCommand}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Empty State -->
+            <Border
+                Visibility="{x:Bind ViewModel.EmptyPlaceholderVisibility, Mode=OneWay}"
+                Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="8" HorizontalAlignment="Center" Padding="32">
+                    <SymbolIcon Symbol="Trim" Foreground="{ThemeResource SecondaryTextBrush}" />
+                    <TextBlock x:Uid="EditorEmptyTitle" Style="{StaticResource SectionHeaderTextStyle}" HorizontalAlignment="Center" />
+                    <TextBlock x:Uid="EditorEmptySubtitle" Style="{StaticResource CaptionSecondaryTextStyle}" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- Active Editor Workspace -->
+            <Grid
+                Visibility="{x:Bind ViewModel.WorkspaceVisibility, Mode=OneWay}"
+                ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="1.5*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Video Player + Trim / Cut / Export -->
+                <StackPanel Grid.Column="0" Spacing="16">
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="{x:Bind ViewModel.LoadedVideoTitle, Mode=OneWay}" Style="{StaticResource SectionHeaderTextStyle}" />
+
+                            <Border
+                                Background="{ThemeResource PreviewBackdropBrush}"
+                                CornerRadius="{StaticResource SharedCornerRadius}"
+                                MinHeight="340">
+                                <MediaPlayerElement
+                                    x:Name="CourseMediaPlayer"
+                                    AreTransportControlsEnabled="True"
+                                    AutoPlay="False"
+                                    Stretch="Uniform" />
+                            </Border>
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox
+                                    Grid.Column="0"
+                                    x:Uid="CmbPlaybackSpeed"
+                                    MinWidth="140"
+                                    ItemsSource="{x:Bind ViewModel.PlaybackSpeedOptions}"
+                                    SelectedItem="{x:Bind ViewModel.SelectedSpeedOption, Mode=TwoWay}" />
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <Button
+                                        x:Uid="BtnEditorToggleFullScreen"
+                                        VerticalAlignment="Bottom"
+                                        Click="OnToggleFullScreenClicked" />
+                                    <Button
+                                        x:Uid="BtnEditorCaptureFrame"
+                                        VerticalAlignment="Bottom"
+                                        IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                        Command="{x:Bind ViewModel.CaptureCurrentFrameCommand}" />
+                                    <Button
+                                        x:Uid="BtnEditorOpenSnapshotFolder"
+                                        VerticalAlignment="Bottom"
+                                        Command="{x:Bind ViewModel.OpenSnapshotFolderCommand}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Trim / Cut / Voice Gain / Dual Export -->
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Uid="EditorSectionTrimCut" Style="{StaticResource SectionHeaderTextStyle}" />
+                            <TextBlock Text="{x:Bind ViewModel.TrimRangeSummaryText, Mode=OneWay}" Style="{StaticResource MonoBadgeTextStyle}" />
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    x:Uid="BtnSetTrimStart"
+                                    IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.SetTrimStartCommand}" />
+                                <Button
+                                    x:Uid="BtnSetTrimEnd"
+                                    IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.SetTrimEndCommand}" />
+                                <Button
+                                    x:Uid="BtnMarkCutStart"
+                                    IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.MarkCutStartCommand}" />
+                                <Button
+                                    x:Uid="BtnAddCutSegment"
+                                    IsEnabled="{x:Bind ViewModel.HasPendingCutStart, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.AddCutSegmentCommand}" />
+                                <Button x:Uid="BtnResetEdits" IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}" Click="OnResetEditsClicked" />
+                            </StackPanel>
+
+                            <ListView
+                                ItemsSource="{x:Bind ViewModel.CutSegments}"
+                                SelectionMode="None"
+                                MaxHeight="140">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:TrimSegment">
+                                        <Grid ColumnSpacing="12" Padding="4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{x:Bind RangeDisplay}" Style="{StaticResource MonoBadgeTextStyle}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind Label}" Style="{StaticResource BodyPrimaryTextStyle}" VerticalAlignment="Center" />
+                                            <Button
+                                                Grid.Column="2"
+                                                x:Uid="BtnRemoveCutSegment"
+                                                Tag="{x:Bind}"
+                                                Click="OnRemoveCutSegmentClicked" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            <Slider
+                                x:Uid="SldAudioGain"
+                                Minimum="100"
+                                Maximum="200"
+                                StepFrequency="10"
+                                IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                Value="{x:Bind ViewModel.AudioGainPercent, Mode=TwoWay}" />
+                            <TextBlock
+                                Text="{x:Bind ViewModel.AudioGainText, Mode=OneWay}"
+                                Style="{StaticResource CaptionSecondaryTextStyle}" />
+
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Button
+                                    x:Uid="BtnExportMp4"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.ExportMp4Command}" />
+                                <Button
+                                    x:Uid="BtnExportM4a"
+                                    IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.ExportM4aCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Right: Bookmarks Jump & Add -->
+                <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" VerticalAlignment="Top">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Uid="EditorSectionBookmarks" Style="{StaticResource SectionHeaderTextStyle}" />
+
+                        <TextBox
+                            x:Uid="TxtBookmarkNote"
+                            Text="{x:Bind ViewModel.NewBookmarkNote, Mode=TwoWay}" />
+                        <Button
+                            x:Uid="BtnEditorAddBookmarkNow"
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                            Command="{x:Bind ViewModel.AddBookmarkAtCurrentPositionCommand}" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                x:Uid="BtnPreviousBookmark"
+                                IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                Command="{x:Bind ViewModel.SeekToPreviousBookmarkCommand}" />
+                            <Button
+                                x:Uid="BtnNextBookmark"
+                                IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                                Command="{x:Bind ViewModel.SeekToNextBookmarkCommand}" />
+                        </StackPanel>
+
+                        <TextBlock
+                            Visibility="{x:Bind ViewModel.BookmarksEmptyVisibility, Mode=OneWay}"
+                            x:Uid="EditorBookmarksEmpty"
+                            Style="{StaticResource CaptionSecondaryTextStyle}" />
+
+                        <ListView
+                            ItemsSource="{x:Bind ViewModel.Bookmarks}"
+                            IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}"
+                            IsItemClickEnabled="True"
+                            SelectionMode="None"
+                            MaxHeight="480"
+                            ItemClick="OnBookmarkItemClicked">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:BookmarkItem">
+                                    <Border x:Name="BookmarkCard" Style="{StaticResource SubtlePanelBorderStyle}" Margin="0,4,0,4">
+                                        <Border.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem x:Uid="MenuEditBookmark" Tag="{x:Bind}" Click="OnEditBookmarkClicked" />
+                                                <MenuFlyoutItem x:Uid="MenuDeleteBookmark" Tag="{x:Bind}" Click="OnDeleteBookmarkClicked" />
+                                            </MenuFlyout>
+                                        </Border.ContextFlyout>
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{x:Bind FormattedTimestamp}" Style="{StaticResource MonoBadgeTextStyle}" />
+                                                <TextBlock Text="{x:Bind Note}" Style="{StaticResource BodyPrimaryTextStyle}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1" x:Uid="BtnBookmarkMore" Tag="{Binding ElementName=BookmarkCard}" Click="OnBookmarkMoreClicked" VerticalAlignment="Top">
+                                                <SymbolIcon Symbol="More" />
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+
+        <controls:ToastPresenter
+            x:Name="ToastPresenter"
+            Margin="24"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            IsHitTestVisible="False" />
+    </Grid>
+</Page>

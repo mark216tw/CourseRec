@@ -1,0 +1,123 @@
+<Window
+    x:Class="Com.VibeCode.CourseRec.Views.MiniOverlayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid x:Name="RootHost">
+        <Border
+            x:Name="RootBorder"
+            Background="{ThemeResource OverlayBackgroundBrush}"
+            BorderBrush="{ThemeResource CardStrokeBrush}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource SharedCornerRadius}"
+            Padding="8,2,8,2"
+            Loaded="OnRootBorderLoaded"
+            SizeChanged="OnRootBorderSizeChanged"
+            PointerPressed="OnDragAreaPointerPressed"
+            PointerMoved="OnDragAreaPointerMoved"
+            PointerReleased="OnDragAreaPointerReleased"
+            PointerCaptureLost="OnDragAreaPointerCaptureLost">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    Spacing="6"
+                    VerticalAlignment="Center">
+                    <Grid VerticalAlignment="Center">
+                        <Ellipse Width="10" Height="10" Fill="{ThemeResource SecondaryTextBrush}" Visibility="{x:Bind ViewModel.IdleIndicatorVisibility, Mode=OneWay}" />
+                        <Ellipse Width="10" Height="10" Fill="{ThemeResource RecordingActiveBrush}" Visibility="{x:Bind ViewModel.ActiveIndicatorVisibility, Mode=OneWay}" />
+                        <Ellipse Width="10" Height="10" Fill="{ThemeResource RecordingPausedBrush}" Visibility="{x:Bind ViewModel.PausedIndicatorVisibility, Mode=OneWay}" />
+                        <ProgressRing Width="18" Height="18" IsActive="{x:Bind ViewModel.IsFinalizing, Mode=OneWay}" Visibility="{x:Bind ViewModel.FinalizingVisibility, Mode=OneWay}" />
+                    </Grid>
+                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                        <TextBlock
+                            Text="{x:Bind ViewModel.StatusBadgeText, Mode=OneWay}"
+                            Style="{StaticResource CaptionSecondaryTextStyle}"
+                            TextWrapping="NoWrap"
+                            VerticalAlignment="Center" />
+                        <TextBlock
+                            Text="{x:Bind ViewModel.ElapsedTimeText, Mode=OneWay}"
+                            Style="{StaticResource MonoBadgeTextStyle}"
+                            TextWrapping="NoWrap"
+                            VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <ProgressBar
+                                x:Uid="MiniSystemMeter"
+                                Width="44"
+                                Height="3"
+                                Minimum="0"
+                                Maximum="100"
+                                Foreground="{ThemeResource MeterSafeBrush}"
+                                Value="{x:Bind ViewModel.SystemMeterPercent, Mode=OneWay}" />
+                            <ProgressBar
+                                x:Uid="MiniMicMeter"
+                                Width="44"
+                                Height="3"
+                                Minimum="0"
+                                Maximum="100"
+                                Foreground="{ThemeResource BrandAccentBrush}"
+                                Value="{x:Bind ViewModel.MicrophoneMeterPercent, Mode=OneWay}" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="4"
+                    VerticalAlignment="Center">
+                    <Button
+                        AutomationProperties.Name="{x:Bind ViewModel.PauseResumeText, Mode=OneWay}"
+                        ToolTipService.ToolTip="{x:Bind ViewModel.PauseResumeText, Mode=OneWay}"
+                        IsEnabled="{x:Bind ViewModel.CanPauseOrResume, Mode=OneWay}"
+                        Command="{x:Bind ViewModel.TogglePauseResumeCommand}"
+                        Padding="6,3,6,3"
+                        MinHeight="28">
+                        <SymbolIcon Symbol="{x:Bind ViewModel.PauseResumeSymbol, Mode=OneWay}" />
+                    </Button>
+                    <Button
+                        AutomationProperties.Name="{x:Bind ViewModel.StopButtonText, Mode=OneWay}"
+                        ToolTipService.ToolTip="{x:Bind ViewModel.StopButtonText, Mode=OneWay}"
+                        IsEnabled="{x:Bind ViewModel.CanStop, Mode=OneWay}"
+                        Click="OnStopRecordingClicked"
+                        Padding="6,3,6,3"
+                        MinHeight="28">
+                        <SymbolIcon Symbol="Stop" />
+                    </Button>
+                    <Button
+                        x:Uid="MiniBtnBookmark"
+                        IsEnabled="{x:Bind ViewModel.CanBookmark, Mode=OneWay}"
+                        Command="{x:Bind ViewModel.AddBookmarkCommand}"
+                        Padding="6,3,6,3"
+                        MinHeight="28">
+                        <SymbolIcon Symbol="Tag" />
+                    </Button>
+                    <Button
+                        x:Uid="MiniBtnSnapshot"
+                        Command="{x:Bind ViewModel.TakeSnapshotCommand}"
+                        Padding="6,3,6,3"
+                        MinHeight="28">
+                        <SymbolIcon Symbol="Camera" />
+                    </Button>
+                    <Button
+                        x:Uid="MiniBtnExpand"
+                        Click="OnExpandMainWindowClicked"
+                        Padding="6,3,6,3"
+                        MinHeight="28">
+                        <SymbolIcon Symbol="NewWindow" />
+                    </Button>
+                    <Button
+                        x:Uid="MiniBtnClose"
+                        Click="OnCloseOverlayClicked"
+                        Padding="6,3,6,3"
+                        MinHeight="28">
+                        <SymbolIcon Symbol="Cancel" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

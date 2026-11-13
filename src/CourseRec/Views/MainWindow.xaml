@@ -1,0 +1,60 @@
+<Window
+    x:Class="Com.VibeCode.CourseRec.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Background="{ThemeResource AppBackgroundBrush}">
+        <NavigationView
+            x:Name="MainNavView"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            PaneDisplayMode="Left"
+            OpenPaneLength="240"
+            SelectionChanged="OnNavSelectionChanged">
+
+            <NavigationView.PaneHeader>
+                <StackPanel Padding="16,12,16,8" Spacing="4">
+                    <TextBlock
+                        x:Uid="AppHeaderTitle"
+                        Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock
+                        x:Uid="AppHeaderSubtitle"
+                        Style="{StaticResource CaptionSecondaryTextStyle}" />
+                </StackPanel>
+            </NavigationView.PaneHeader>
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="NavItemRecorder" x:Uid="NavRecorder" Tag="Recorder">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Video" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemLibrary" x:Uid="NavLibrary" Tag="Library">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Library" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemEditor" x:Uid="NavEditor" Tag="Editor">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Trim" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NavItemSettings" x:Uid="NavSettings" Tag="Settings">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Setting" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavItemAbout" x:Uid="NavAbout" Tag="About">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Help" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+    </Grid>
+</Window>

@@ -1,0 +1,147 @@
+<Page
+    x:Class="Com.VibeCode.CourseRec.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer Padding="{StaticResource PageContentPadding}">
+        <StackPanel Spacing="16" MaxWidth="860" HorizontalAlignment="Left">
+            <StackPanel Spacing="4">
+                <TextBlock x:Uid="SettingsPageTitle" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock x:Uid="SettingsPageSubtitle" Style="{StaticResource PageSubtitleTextStyle}" />
+            </StackPanel>
+
+            <InfoBar
+                x:Name="StatusInfoBar"
+                IsOpen="{x:Bind ViewModel.IsStatusOpen, Mode=TwoWay}"
+                Message="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                Severity="{x:Bind ViewModel.StatusSeverity, Mode=OneWay}" />
+
+            <!-- Display Theme -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="SettingsSectionAppearance" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <ComboBox
+                        x:Uid="CmbDisplayMode"
+                        MinWidth="260"
+                        HorizontalAlignment="Left"
+                        ItemsSource="{x:Bind ViewModel.DisplayModeOptions}"
+                        SelectedItem="{x:Bind ViewModel.SelectedDisplayModeOption, Mode=TwoWay}" />
+                    <ComboBox
+                        x:Uid="CmbColorTheme"
+                        MinWidth="260"
+                        HorizontalAlignment="Left"
+                        ItemsSource="{x:Bind ViewModel.ColorThemeOptions}"
+                        SelectedItem="{x:Bind ViewModel.SelectedColorThemeOption, Mode=TwoWay}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Recording -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="SettingsSectionRecording" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <StackPanel Spacing="4">
+                        <ComboBox
+                            x:Uid="CmbRecordingCountdown"
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{x:Bind ViewModel.CountdownOptions}"
+                            SelectedItem="{x:Bind ViewModel.SelectedCountdownOption, Mode=TwoWay}" />
+                        <TextBlock x:Uid="CmbRecordingCountdownDescription" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                    </StackPanel>
+                    <ToggleSwitch
+                        x:Uid="SwLivePreviewDefault"
+                        IsOn="{x:Bind ViewModel.IsLivePreviewEnabledByDefault, Mode=TwoWay}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Storage & Overlay -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="SettingsSectionStorage" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            Grid.Column="0"
+                            x:Uid="TxtOutputDirectory"
+                            Text="{x:Bind ViewModel.OutputDirectory, Mode=TwoWay}" />
+                        <Button
+                            Grid.Column="1"
+                            x:Uid="BtnBrowseOutputDir"
+                            VerticalAlignment="Bottom"
+                            Click="OnBrowseOutputDirectoryClicked" />
+                        <Button
+                            Grid.Column="2"
+                            x:Uid="BtnOpenOutputDir"
+                            VerticalAlignment="Bottom"
+                            Command="{x:Bind ViewModel.OpenOutputDirectoryCommand}">
+                            <SymbolIcon Symbol="OpenFile" />
+                        </Button>
+                    </Grid>
+                    <StackPanel Spacing="4">
+                        <TextBox
+                            x:Uid="TxtRecordingFileNamePrefix"
+                            Text="{x:Bind ViewModel.RecordingFileNamePrefix, Mode=TwoWay}" />
+                        <TextBlock x:Uid="TxtRecordingFileNamePrefixDescription" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                    </StackPanel>
+                    <ToggleSwitch
+                        x:Uid="SwExcludeOverlay"
+                        IsOn="{x:Bind ViewModel.ExcludeOverlayFromCapture, Mode=TwoWay}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Hotkeys -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="SettingsSectionHotkeys" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <Grid ColumnSpacing="12" RowSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            x:Uid="TxtHotkeyStartStop"
+                            Text="{x:Bind ViewModel.ToggleStartStopHotkey, Mode=TwoWay}"
+                            PreviewKeyDown="OnHotkeyTextBoxPreviewKeyDown" />
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            x:Uid="TxtHotkeyPause"
+                            Text="{x:Bind ViewModel.TogglePauseHotkey, Mode=TwoWay}"
+                            PreviewKeyDown="OnHotkeyTextBoxPreviewKeyDown" />
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            x:Uid="TxtHotkeyBookmark"
+                            Text="{x:Bind ViewModel.AddBookmarkHotkey, Mode=TwoWay}"
+                            PreviewKeyDown="OnHotkeyTextBoxPreviewKeyDown" />
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            x:Uid="TxtHotkeySnapshot"
+                            Text="{x:Bind ViewModel.TakeSnapshotHotkey, Mode=TwoWay}"
+                            PreviewKeyDown="OnHotkeyTextBoxPreviewKeyDown" />
+                    </Grid>
+                    <Button
+                        x:Uid="BtnResetHotkeys"
+                        HorizontalAlignment="Left"
+                        Command="{x:Bind ViewModel.ResetHotkeysToDefaultsCommand}" />
+                </StackPanel>
+            </Border>
+
+            <Button
+                x:Uid="BtnSaveSettings"
+                Style="{StaticResource AccentButtonStyle}"
+                HorizontalAlignment="Left"
+                Command="{x:Bind ViewModel.SaveSettingsCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

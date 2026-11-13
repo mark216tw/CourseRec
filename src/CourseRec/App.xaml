@@ -1,0 +1,19 @@
+<Application
+    x:Class="Com.VibeCode.CourseRec.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Com.VibeCode.CourseRec.Helpers">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Styles/SharedStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <helpers:FileSizeConverter x:Key="FileSizeConverter" />
+            <helpers:TimeSpanFormatConverter x:Key="TimeSpanFormatConverter" />
+            <helpers:BooleanNegationConverter x:Key="BooleanNegationConverter" />
+            <helpers:IconDataToImageSourceConverter x:Key="IconDataToImageSourceConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
