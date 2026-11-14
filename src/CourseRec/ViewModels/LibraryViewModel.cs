@@ -378,6 +378,17 @@ public sealed partial class LibraryViewModel : ObservableObject
             _localization.GetString("DialogCancel"));
     }
 
+    public (string Title, string Message, string ConfirmText, string CancelText) GetReplaceEditorVideoDialogTexts(
+        string currentVideoTitle,
+        string newVideoFileName)
+    {
+        return (
+            _localization.GetString("DialogReplaceEditorVideoTitle"),
+            _localization.Format("DialogReplaceEditorVideoMessageFormat", currentVideoTitle, newVideoFileName),
+            _localization.GetString("DialogConfirmReplaceEditorVideo"),
+            _localization.GetString("DialogCancel"));
+    }
+
     public async Task<string?> RenameRecordingAsync(RecordingLibraryItem item, string requestedName)
     {
         ArgumentNullException.ThrowIfNull(item);

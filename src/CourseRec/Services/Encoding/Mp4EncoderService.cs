@@ -13,10 +13,12 @@ public sealed class Mp4EncoderService : IMp4EncoderService
 {
     private readonly ILogger<Mp4EncoderService> _logger;
     private readonly object _writerLock = new();
-    private readonly bool _mfInitialized;
+    private readonly object _mfLock = new();
     private readonly (nint Buffer, uint Capacity)[] _videoBufferPool = new (nint, uint)[6];
     private readonly (nint Buffer, uint Capacity)[] _audioBufferPool = new (nint, uint)[4];
 
+    private bool _mfInitializationAttempted;
+    private bool _mfInitialized;
     private nint _sinkWriter;
     private uint _videoStreamIndex;
     private uint _audioStreamIndex;
@@ -28,17 +30,32 @@ public sealed class Mp4EncoderService : IMp4EncoderService
     public Mp4EncoderService(ILogger<Mp4EncoderService> logger)
     {
         _logger = logger;
-        int hr = MediaFoundationNativeMethods.MFStartup(
-            MediaFoundationNativeMethods.MfVersion,
-            MediaFoundationNativeMethods.MfStartupNosocket);
-        _mfInitialized = hr >= 0;
-        if (!_mfInitialized)
-        {
-            _logger.LogError("MFStartup 初始化失敗，HRESULT=0x{Hr:X8}", hr);
-        }
     }
 
     public bool IsOpen => _sinkWriter != 0;
+
+    private bool EnsureMediaFoundationInitialized()
+    {
+        lock (_mfLock)
+        {
+            if (_mfInitializationAttempted)
+            {
+                return _mfInitialized;
+            }
+
+            _mfInitializationAttempted = true;
+            int hr = MediaFoundationNativeMethods.MFStartup(
+                MediaFoundationNativeMethods.MfVersion,
+                MediaFoundationNativeMethods.MfStartupNosocket);
+            _mfInitialized = hr >= 0;
+            if (!_mfInitialized)
+            {
+                _logger.LogError("MFStartup 初始化失敗，HRESULT=0x{Hr:X8}", hr);
+            }
+
+            return _mfInitialized;
+        }
+    }
 
     public RecordingProfile? ActiveProfile { get; private set; }
 
@@ -54,6 +71,11 @@ public sealed class Mp4EncoderService : IMp4EncoderService
 
         lock (_writerLock)
         {
+            if (!EnsureMediaFoundationInitialized())
+            {
+                throw new InvalidOperationException("Media Foundation 初始化失敗，無法開始編碼。");
+            }
+
             FinalizeRecording();
 
             string? dir = Path.GetDirectoryName(outputFilePath);

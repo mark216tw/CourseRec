@@ -2,10 +2,9 @@ using System.Collections.Specialized;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Com.VibeCode.CourseRec.Helpers;
 using Com.VibeCode.CourseRec.Models;
+using Com.VibeCode.CourseRec.Services;
 using Com.VibeCode.CourseRec.Services.Capture;
-using Com.VibeCode.CourseRec.Services.Settings;
 using Com.VibeCode.CourseRec.ViewModels;
-using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -15,14 +14,13 @@ using Windows.System;
 namespace Com.VibeCode.CourseRec.Views;
 
 /// <summary>
-/// 錄製工作台頁面（負責綁定即時預覽 <see cref="WriteableBitmap"/> 與迷你懸浮控制列生命週期）。
+/// 錄製工作台頁面（負責綁定即時預覽 <see cref="WriteableBitmap"/> 與切換迷你控制列）。
 /// </summary>
 public sealed partial class RecorderPage : Page
 {
     private readonly ILocalizationService _localization;
     private WriteableBitmap? _previewBitmap;
     private Stream? _previewStream;
-    private MiniOverlayWindow? _overlayWindow;
     private int _isUpdatingPreview;
     private CapturedFrameData? _pendingPreview;
 
@@ -44,17 +42,31 @@ public sealed partial class RecorderPage : Page
         ViewModel.AttachDispatcher(DispatcherQueue);
         ViewModel.PreviewFrameArrived += OnPreviewFrameArrived;
         ViewModel.ToggleMiniOverlayRequested += OnToggleMiniOverlayRequested;
-        ViewModel.CloseMiniOverlayRequested += OnCloseMiniOverlayRequested;
         ViewModel.SessionBookmarks.CollectionChanged += OnSessionBookmarksChanged;
-        ViewModel.ResumeIdleCapture();
+        ViewModel.StartIdleServices();
         UpdatePreviewPresentation();
+
+        // 擷取裝置與音訊監控建立較耗時，排到第一幀之後再啟動。
+        if (!DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, ResumeIdleCaptureDeferred))
+        {
+            ResumeIdleCaptureDeferred();
+        }
+    }
+
+    private void ResumeIdleCaptureDeferred()
+    {
+        if (!IsLoaded)
+        {
+            return;
+        }
+
+        ViewModel.ResumeIdleCapture();
     }
 
     private void OnPageUnloaded(object sender, RoutedEventArgs e)
     {
         ViewModel.PreviewFrameArrived -= OnPreviewFrameArrived;
         ViewModel.ToggleMiniOverlayRequested -= OnToggleMiniOverlayRequested;
-        ViewModel.CloseMiniOverlayRequested -= OnCloseMiniOverlayRequested;
         ViewModel.SessionBookmarks.CollectionChanged -= OnSessionBookmarksChanged;
         ViewModel.SuspendIdleCapture();
         Interlocked.Exchange(ref _pendingPreview, null)?.Dispose();
@@ -152,41 +164,7 @@ public sealed partial class RecorderPage : Page
 
     private void OnToggleMiniOverlayRequested(object? sender, EventArgs e)
     {
-        if (_overlayWindow is not null)
-        {
-            CloseMiniOverlay();
-            return;
-        }
-
-        var localization = App.GetService<ILocalizationService>();
-        var settingsService = App.GetService<ISettingsService>();
-        AppSettings settings = settingsService.Current;
-        var themeService = App.GetService<IThemeService>();
-        var logger = App.GetService<ILogger<MiniOverlayWindow>>();
-
-        var overlayWindow = new MiniOverlayWindow(
-            ViewModel,
-            localization,
-            settingsService,
-            settings.ExcludeOverlayFromCapture,
-            logger);
-        overlayWindow.Closed += (_, _) =>
-        {
-            themeService.UnregisterWindow(overlayWindow);
-            if (ReferenceEquals(_overlayWindow, overlayWindow))
-            {
-                _overlayWindow = null;
-            }
-        };
-
-        _overlayWindow = overlayWindow;
-        themeService.RegisterWindow(overlayWindow);
-        overlayWindow.Activate();
-    }
-
-    private void OnCloseMiniOverlayRequested(object? sender, EventArgs e)
-    {
-        CloseMiniOverlay();
+        App.GetService<IMiniOverlayService>().Toggle();
     }
 
     private void OnBookmarkNoteKeyDown(object sender, KeyRoutedEventArgs e)
@@ -225,16 +203,6 @@ public sealed partial class RecorderPage : Page
         if (sender is FrameworkElement { Tag: BookmarkItem bookmark })
         {
             ViewModel.RemoveBookmark(bookmark);
-        }
-    }
-
-    private void CloseMiniOverlay()
-    {
-        if (_overlayWindow is not null)
-        {
-            MiniOverlayWindow windowToClose = _overlayWindow;
-            _overlayWindow = null;
-            windowToClose.Close();
         }
     }
 }

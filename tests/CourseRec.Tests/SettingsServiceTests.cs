@@ -158,6 +158,27 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SaveMiniOverlayPositionAsync_PersistsDipSize()
+    {
+        string settingsPath = Path.Combine(_tempDir, "settings.json");
+        var service = new SettingsService(
+            settingsPath,
+            new CourseRecDefaultOptions(),
+            NullLogger<SettingsService>.Instance);
+        await service.LoadAsync();
+
+        await service.SaveMiniOverlayPositionAsync(new MiniOverlayPosition(640, 480, 264.5, 36.25));
+
+        var reloadedService = new SettingsService(
+            settingsPath,
+            new CourseRecDefaultOptions(),
+            NullLogger<SettingsService>.Instance);
+        AppSettings reloaded = await reloadedService.LoadAsync();
+
+        Assert.Equal(new MiniOverlayPosition(640, 480, 264.5, 36.25), reloaded.MiniOverlayPosition);
+    }
+
+    [Fact]
     public async Task SaveLibrarySortOrderAndLastPage_PreservesOtherSettingsAndPersists()
     {
         string settingsPath = Path.Combine(_tempDir, "settings.json");
@@ -303,6 +324,28 @@ public sealed class SettingsServiceTests : IDisposable
         AppSettings loaded = await service.LoadAsync();
 
         Assert.Equal(AppColorTheme.EyeCareYellow, loaded.ColorTheme);
+    }
+
+    [Fact]
+    public async Task LoadAsync_MigratesRemovedSkyThemeToIndigo()
+    {
+        string settingsPath = Path.Combine(_tempDir, "settings.json");
+        await File.WriteAllTextAsync(
+            settingsPath,
+            """
+            {
+              "outputDirectory": "",
+              "colorTheme": "Sky"
+            }
+            """);
+
+        var service = new SettingsService(
+            settingsPath,
+            new CourseRecDefaultOptions(),
+            NullLogger<SettingsService>.Instance);
+        AppSettings loaded = await service.LoadAsync();
+
+        Assert.Equal(AppColorTheme.Indigo, loaded.ColorTheme);
     }
 
     [Fact]

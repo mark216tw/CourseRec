@@ -38,6 +38,9 @@ public static partial class WindowNativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool GetCursorPos(out Point lpPoint);
 
+    [LibraryImport("user32.dll")]
+    public static partial uint GetDpiForWindow(nint hWnd);
+
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmSetWindowAttribute(nint hwnd, int attribute, ref int value, int size);
 

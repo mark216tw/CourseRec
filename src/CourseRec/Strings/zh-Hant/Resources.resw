@@ -97,10 +97,10 @@
   <data name="BtnOpenCompletedRecording.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>在快剪開啟剛完成的錄影</value></data>
   <data name="BtnRevealCompletedRecording.Content" xml:space="preserve"><value>顯示錄影檔案</value></data>
   <data name="BtnRevealCompletedRecording.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>在檔案總管顯示剛完成的錄影</value></data>
-  <data name="BtnOpenCompletedExport.Content" xml:space="preserve"><value>開啟剛完成的匯出</value></data>
-  <data name="BtnOpenCompletedExport.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>開啟剛完成的匯出檔案</value></data>
-  <data name="BtnRevealCompletedExport.Content" xml:space="preserve"><value>顯示匯出檔案</value></data>
-  <data name="BtnRevealCompletedExport.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>在檔案總管顯示剛完成的匯出</value></data>
+  <data name="BtnOpenCompletedExport.Content" xml:space="preserve"><value>開啟剛完成的匯出影片</value></data>
+  <data name="BtnOpenCompletedExport.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>開啟剛完成的匯出影片</value></data>
+  <data name="BtnOpenExportFolder.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>開啟匯出目錄</value></data>
+  <data name="BtnOpenExportFolder.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>在檔案總管開啟匯出資料夾</value></data>
   <data name="TxtLibrarySearch.PlaceholderText" xml:space="preserve"><value>輸入檔名搜尋錄影…</value></data>
   <data name="TxtLibrarySearch.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>依檔名搜尋錄影，清空文字可顯示全部</value></data>
   <data name="BtnClearLibrarySearch.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>清空搜尋條件</value></data>
@@ -183,6 +183,15 @@
   </data>
   <data name="DialogDiscardEditorChangesMessage" xml:space="preserve">
     <value>目前的頭尾保留、剪除區間或音量增益尚未匯出，開啟其他影片會捨棄這些設定。書籤與原始影片不會受影響。</value>
+  </data>
+  <data name="DialogReplaceEditorVideoTitle" xml:space="preserve">
+    <value>取代編輯器目前的影片？</value>
+  </data>
+  <data name="DialogReplaceEditorVideoMessageFormat" xml:space="preserve">
+    <value>編輯器目前已有影片「{0}」。開啟「{1}」會取代目前的影片，並清除頭尾保留、剪除區間與音量增益。書籤與原始影片不受影響。</value>
+  </data>
+  <data name="DialogConfirmReplaceEditorVideo" xml:space="preserve">
+    <value>開啟並取代</value>
   </data>
   <data name="DialogConfirmDiscardAndOpen" xml:space="preserve">
     <value>捨棄並開啟</value>
@@ -417,10 +426,10 @@
     <value>開啟快拍 PNG 儲存資料夾</value>
   </data>
   <data name="BtnToggleMiniOverlay.Content" xml:space="preserve">
-    <value>切換迷你懸浮控制列</value>
+    <value>切換迷你控制列</value>
   </data>
   <data name="BtnToggleMiniOverlay.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>開啟或關閉防入鏡迷你懸浮控制列</value>
+    <value>開啟或關閉防入鏡迷你控制列</value>
   </data>
 
   <!-- Recorder States & Messages -->
@@ -466,43 +475,37 @@
 
   <!-- MiniOverlayWindow -->
   <data name="MiniOverlayTitle" xml:space="preserve">
-    <value>CourseRec 懸浮控制</value>
+    <value>CourseRec 迷你控制列</value>
   </data>
   <data name="MiniBtnPauseResume.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>懸浮列暫停或繼續錄影</value>
+    <value>迷你控制列暫停或繼續錄影</value>
   </data>
   <data name="MiniBtnPauseResume.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>暫停／繼續錄影</value>
   </data>
   <data name="MiniBtnBookmark.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>懸浮列快速打時間書籤</value>
+    <value>迷你控制列快速打時間書籤</value>
   </data>
   <data name="MiniBtnBookmark.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>快速打重點書籤</value>
   </data>
   <data name="MiniBtnSnapshot.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>懸浮列投影片快拍</value>
+    <value>迷你控制列投影片快拍</value>
   </data>
   <data name="MiniBtnSnapshot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>投影片快拍</value>
   </data>
   <data name="MiniBtnStop.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>懸浮列停止錄影</value>
+    <value>迷你控制列停止錄影</value>
   </data>
   <data name="MiniBtnStop.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>停止錄影並返回主視窗</value>
   </data>
-  <data name="MiniBtnExpand.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>開啟主視窗</value>
-  </data>
-  <data name="MiniBtnExpand.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>開啟主視窗</value>
-  </data>
   <data name="MiniBtnClose.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>關閉懸浮控制列</value>
+    <value>關閉迷你控制列</value>
   </data>
   <data name="MiniBtnClose.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>關閉懸浮控制列（錄影會繼續）</value>
+    <value>關閉迷你控制列（錄影會繼續）</value>
   </data>
   <data name="TaskbarRecordingOverlayDescription" xml:space="preserve">
     <value>錄影中</value>
@@ -635,13 +638,13 @@
     <value>開啟 PNG 資料夾</value>
   </data>
   <data name="BtnEditorOpenSnapshotFolder.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>在檔案總管開啟當前簡報頁 PNG 資料夾</value>
+    <value>在檔案總管開啟當前畫面 PNG 資料夾</value>
   </data>
   <data name="BtnEditorOpenSnapshotFolder.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>快速開啟目前簡報頁 PNG 的儲存資料夾</value>
+    <value>快速開啟當前畫面 PNG 的儲存資料夾</value>
   </data>
   <data name="BtnEditorCaptureFrame.Content" xml:space="preserve">
-    <value>擷取當前簡報頁為 PNG</value>
+    <value>擷取當前畫面為PNG</value>
   </data>
   <data name="BtnEditorCaptureFrame.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>將目前播放時間點的畫面儲存為 PNG 圖片</value>
@@ -682,10 +685,10 @@
     <value>標記待刪除區間的起點</value>
   </data>
   <data name="BtnAddCutSegment.Content" xml:space="preserve">
-    <value>以目前位置完成剪除區間</value>
+    <value>標記剪除終點</value>
   </data>
   <data name="BtnAddCutSegment.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>將標記起點至目前播放位置加入待剪除區間清單</value>
+    <value>將目前播放位置標記為剪除終點並加入待剪除區間清單</value>
   </data>
   <data name="BtnRemoveCutSegment.Content" xml:space="preserve">
     <value>移除</value>
@@ -703,13 +706,13 @@
     <value>調整匯出時的音量放大百分比</value>
   </data>
   <data name="BtnExportMp4.Content" xml:space="preserve">
-    <value>匯出剪輯後 MP4 影片</value>
+    <value>匯出 MP4 影片</value>
   </data>
   <data name="BtnExportMp4.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>匯出剪輯並校正書籤後的 MP4 課程影片</value>
   </data>
   <data name="BtnExportM4a.Content" xml:space="preserve">
-    <value>匯出 M4A 純音訊（AI 逐字稿專用）</value>
+    <value>匯出 M4A 純音訊</value>
   </data>
   <data name="BtnExportM4a.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>匯出輕量 M4A 音訊檔供 NotebookLM 或 Whisper 產生摘要</value>
@@ -771,16 +774,16 @@
     <value>在檔案總管開啟輸出資料夾</value>
   </data>
   <data name="SwExcludeOverlay.Header" xml:space="preserve">
-    <value>錄影時自動隱藏迷你懸浮控制列不入鏡</value>
+    <value>錄影時自動隱藏迷你控制列不入鏡</value>
   </data>
   <data name="SwExcludeOverlay.OnContent" xml:space="preserve">
     <value>已啟用</value>
   </data>
   <data name="SwExcludeOverlay.OffContent" xml:space="preserve">
-    <value>已停用（懸浮列會被錄入畫面）</value>
+    <value>已停用（迷你控制列會被錄入畫面）</value>
   </data>
   <data name="SwExcludeOverlay.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>切換是否將迷你懸浮控制列排除於螢幕擷取之外</value>
+    <value>切換是否將迷你控制列排除於螢幕擷取之外</value>
   </data>
 
   <data name="SettingsSectionAppearance.Text" xml:space="preserve">
@@ -801,11 +804,17 @@
   <data name="DisplayModeDarkText" xml:space="preserve">
     <value>深色</value>
   </data>
-  <data name="CmbColorTheme.Header" xml:space="preserve">
+  <data name="TxtColorTheme.Text" xml:space="preserve">
     <value>主題顏色</value>
   </data>
-  <data name="CmbColorTheme.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>選擇護眼黃、海洋藍、森林綠、暖陽橘或薰衣草紫主題顏色</value>
+  <data name="BtnColorTheme.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>選擇主題顏色</value>
+  </data>
+  <data name="ThemeColorFlyoutTitle.Text" xml:space="preserve">
+    <value>主題顏色</value>
+  </data>
+  <data name="GridViewColorThemes.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>選擇主題顏色色塊</value>
   </data>
   <data name="ThemeEyeCareYellowText" xml:space="preserve">
     <value>護眼黃</value>
@@ -821,6 +830,21 @@
   </data>
   <data name="ThemeLavenderText" xml:space="preserve">
     <value>薰衣草紫</value>
+  </data>
+  <data name="ThemeRoseText" xml:space="preserve">
+    <value>玫瑰粉</value>
+  </data>
+  <data name="ThemeMintText" xml:space="preserve">
+    <value>薄荷綠</value>
+  </data>
+  <data name="ThemeGraphiteText" xml:space="preserve">
+    <value>石墨灰</value>
+  </data>
+  <data name="ThemeCocoaText" xml:space="preserve">
+    <value>可可棕</value>
+  </data>
+  <data name="ThemeIndigoText" xml:space="preserve">
+    <value>靛藍</value>
   </data>
 
   <data name="SettingsSectionRecording.Text" xml:space="preserve">
@@ -998,6 +1022,9 @@
   </data>
   <data name="LibraryOpenFolderFailedText" xml:space="preserve">
     <value>無法開啟儲存資料夾，請確認路徑存在且可存取。</value>
+  </data>
+  <data name="ExportFolderOpenFailedText" xml:space="preserve">
+    <value>無法開啟匯出資料夾，請確認輸出路徑存在且可存取。</value>
   </data>
   <data name="LibraryRevealFailedText" xml:space="preserve">
     <value>無法開啟檔案位置，請確認檔案仍存在。</value>

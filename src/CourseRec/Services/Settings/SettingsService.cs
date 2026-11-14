@@ -279,6 +279,10 @@ public sealed class SettingsService : ISettingsService
         {
             colorTheme = AppColorTheme.EyeCareYellow;
         }
+        else if (colorTheme == AppColorTheme.Sky)
+        {
+            colorTheme = AppColorTheme.Indigo;
+        }
 
         return new AppSettings
         {
@@ -293,7 +297,7 @@ public sealed class SettingsService : ISettingsService
             RecordingCountdownSeconds = NormalizeCountdownSeconds(input.RecordingCountdownSeconds),
             IsLivePreviewEnabledByDefault = input.IsLivePreviewEnabledByDefault,
             WindowPlacement = NormalizeWindowPlacement(input.WindowPlacement),
-            MiniOverlayPosition = input.MiniOverlayPosition,
+            MiniOverlayPosition = NormalizeMiniOverlayPosition(input.MiniOverlayPosition),
             ExcludeOverlayFromCapture = input.ExcludeOverlayFromCapture,
             IsolateWindowAudioByDefault = input.IsolateWindowAudioByDefault,
             RecordingFileNamePrefix = FileNameHelper.SanitizePrefix(input.RecordingFileNamePrefix),
@@ -356,6 +360,27 @@ public sealed class SettingsService : ISettingsService
         {
             Width = Math.Clamp(placement.Width, 320, 16384),
             Height = Math.Clamp(placement.Height, 240, 16384),
+        };
+    }
+
+    private static MiniOverlayPosition? NormalizeMiniOverlayPosition(MiniOverlayPosition? position)
+    {
+        if (position is null)
+        {
+            return null;
+        }
+
+        double widthDip = position.WidthDip > 0
+            ? Math.Clamp(position.WidthDip, 160, 2000)
+            : 0;
+        double heightDip = position.HeightDip > 0
+            ? Math.Clamp(position.HeightDip, 24, 300)
+            : 0;
+
+        return position with
+        {
+            WidthDip = widthDip,
+            HeightDip = heightDip,
         };
     }
 }

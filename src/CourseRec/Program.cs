@@ -1,3 +1,4 @@
+using Com.VibeCode.CourseRec.Helpers;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using WinRT;
@@ -15,6 +16,9 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        StartupTrace.Start();
+        StartupTrace.Mark("進入點");
+
         using var singleInstanceMutex = new Mutex(initiallyOwned: true, MutexName, out bool createdNew);
         using var activateEvent = new EventWaitHandle(initialState: false, EventResetMode.AutoReset, ActivateEventName);
 
@@ -25,6 +29,7 @@ public static class Program
         }
 
         ComWrappersSupport.InitializeComWrappers();
+        StartupTrace.Mark("ComWrappers 初始化完成");
 
         Application.Start(p =>
         {

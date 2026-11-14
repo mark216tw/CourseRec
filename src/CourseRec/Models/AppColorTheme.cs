@@ -34,4 +34,34 @@ public enum AppColorTheme
     /// 薰衣草紫。
     /// </summary>
     Lavender = 5,
+
+    /// <summary>
+    /// 玫瑰粉。
+    /// </summary>
+    Rose = 6,
+
+    /// <summary>
+    /// 薄荷綠。
+    /// </summary>
+    Mint = 7,
+
+    /// <summary>
+    /// 石墨灰。
+    /// </summary>
+    Graphite = 8,
+
+    /// <summary>
+    /// 可可棕。
+    /// </summary>
+    Cocoa = 9,
+
+    /// <summary>
+    /// 天空藍（已停用，僅保留舊設定檔讀取相容；載入時自動轉為 <see cref="Indigo"/>）。
+    /// </summary>
+    Sky = 10,
+
+    /// <summary>
+    /// 靛藍。
+    /// </summary>
+    Indigo = 11,
 }

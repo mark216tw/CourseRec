@@ -8,6 +8,7 @@ using Com.VibeCode.CourseRec.Services.Hotkeys;
 using Com.VibeCode.CourseRec.Services.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
+using Windows.UI;
 
 namespace Com.VibeCode.CourseRec.ViewModels;
 
@@ -42,7 +43,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     public partial SelectOption<AppDisplayMode>? SelectedDisplayModeOption { get; set; }
 
     [ObservableProperty]
-    public partial SelectOption<AppColorTheme>? SelectedColorThemeOption { get; set; }
+    public partial ColorThemeOption? SelectedColorThemeOption { get; set; }
 
     [ObservableProperty]
     public partial string ToggleStartStopHotkey { get; set; } = string.Empty;
@@ -87,11 +88,46 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         ColorThemeOptions =
         [
-            new SelectOption<AppColorTheme>(AppColorTheme.EyeCareYellow, _localization.GetString("ThemeEyeCareYellowText")),
-            new SelectOption<AppColorTheme>(AppColorTheme.Ocean, _localization.GetString("ThemeOceanText")),
-            new SelectOption<AppColorTheme>(AppColorTheme.Forest, _localization.GetString("ThemeForestText")),
-            new SelectOption<AppColorTheme>(AppColorTheme.Sunset, _localization.GetString("ThemeSunsetText")),
-            new SelectOption<AppColorTheme>(AppColorTheme.Lavender, _localization.GetString("ThemeLavenderText")),
+            CreateColorThemeOption(
+                AppColorTheme.EyeCareYellow,
+                "ThemeEyeCareYellowText",
+                Color.FromArgb(0xFF, 0x9A, 0x6A, 0x00)),
+            CreateColorThemeOption(
+                AppColorTheme.Ocean,
+                "ThemeOceanText",
+                Color.FromArgb(0xFF, 0x0D, 0x47, 0xA1)),
+            CreateColorThemeOption(
+                AppColorTheme.Forest,
+                "ThemeForestText",
+                Color.FromArgb(0xFF, 0x2E, 0x7D, 0x32)),
+            CreateColorThemeOption(
+                AppColorTheme.Sunset,
+                "ThemeSunsetText",
+                Color.FromArgb(0xFF, 0xE6, 0x4A, 0x19)),
+            CreateColorThemeOption(
+                AppColorTheme.Lavender,
+                "ThemeLavenderText",
+                Color.FromArgb(0xFF, 0x6A, 0x1B, 0x9A)),
+            CreateColorThemeOption(
+                AppColorTheme.Rose,
+                "ThemeRoseText",
+                Color.FromArgb(0xFF, 0xC2, 0x18, 0x5B)),
+            CreateColorThemeOption(
+                AppColorTheme.Mint,
+                "ThemeMintText",
+                Color.FromArgb(0xFF, 0x00, 0x89, 0x7B)),
+            CreateColorThemeOption(
+                AppColorTheme.Graphite,
+                "ThemeGraphiteText",
+                Color.FromArgb(0xFF, 0x45, 0x5A, 0x64)),
+            CreateColorThemeOption(
+                AppColorTheme.Cocoa,
+                "ThemeCocoaText",
+                Color.FromArgb(0xFF, 0x5D, 0x40, 0x37)),
+            CreateColorThemeOption(
+                AppColorTheme.Indigo,
+                "ThemeIndigoText",
+                Color.FromArgb(0xFF, 0x39, 0x49, 0xAB)),
         ];
 
         CountdownOptions =
@@ -109,9 +145,20 @@ public sealed partial class SettingsViewModel : ObservableObject
         SyncFromSettings(_settingsService.Current);
     }
 
+    private ColorThemeOption CreateColorThemeOption(
+        AppColorTheme value,
+        string resourceKey,
+        Color accentColor)
+    {
+        return new ColorThemeOption(
+            value,
+            _localization.GetString(resourceKey),
+            accentColor);
+    }
+
     public ObservableCollection<SelectOption<AppDisplayMode>> DisplayModeOptions { get; }
 
-    public ObservableCollection<SelectOption<AppColorTheme>> ColorThemeOptions { get; }
+    public ObservableCollection<ColorThemeOption> ColorThemeOptions { get; }
 
     public ObservableCollection<SelectOption<int>> CountdownOptions { get; }
 
@@ -124,7 +171,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedColorThemeOptionChanged(SelectOption<AppColorTheme>? value)
+    partial void OnSelectedColorThemeOptionChanged(ColorThemeOption? value)
     {
         if (value is not null)
         {

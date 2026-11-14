@@ -11,9 +11,12 @@ namespace Com.VibeCode.CourseRec.Views;
 /// </summary>
 public sealed partial class LibraryPage : Page
 {
+    private readonly EditorViewModel _editorViewModel;
+
     public LibraryPage()
     {
         ViewModel = App.GetService<LibraryViewModel>();
+        _editorViewModel = App.GetService<EditorViewModel>();
         InitializeComponent();
         Loaded += OnPageLoaded;
     }
@@ -49,21 +52,53 @@ public sealed partial class LibraryPage : Page
         }
     }
 
-    private void OnOpenInEditorClicked(object sender, RoutedEventArgs e)
+    private async void OnOpenInEditorClicked(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement { Tag: RecordingLibraryItem item })
         {
-            ViewModel.OpenInEditor(item);
+            await OpenInEditorAsync(item);
         }
     }
 
-    private void OnRecordingItemDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    private async void OnRecordingItemDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         if (sender is FrameworkElement { Tag: RecordingLibraryItem item })
         {
-            ViewModel.OpenInEditor(item);
             e.Handled = true;
+            await OpenInEditorAsync(item);
         }
+    }
+
+    private async Task OpenInEditorAsync(RecordingLibraryItem item)
+    {
+        if (!await ConfirmReplaceEditorVideoAsync(item))
+        {
+            return;
+        }
+
+        ViewModel.OpenInEditor(item);
+    }
+
+    private async Task<bool> ConfirmReplaceEditorVideoAsync(RecordingLibraryItem item)
+    {
+        if (!_editorViewModel.HasLoadedVideo || XamlRoot is null)
+        {
+            return true;
+        }
+
+        (string title, string message, string confirmText, string cancelText) =
+            ViewModel.GetReplaceEditorVideoDialogTexts(_editorViewModel.LoadedVideoTitle, item.FileName);
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = title,
+            Content = message,
+            PrimaryButtonText = confirmText,
+            CloseButtonText = cancelText,
+            DefaultButton = ContentDialogButton.Close,
+        };
+
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 
     private void OnRevealFileClicked(object sender, RoutedEventArgs e)

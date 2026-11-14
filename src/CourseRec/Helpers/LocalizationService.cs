@@ -10,20 +10,25 @@ namespace Com.VibeCode.CourseRec.Helpers;
 /// </summary>
 public sealed class LocalizationService : ILocalizationService
 {
-    private readonly ResourceLoader? _resourceLoader;
-    private readonly Dictionary<string, string> _fallbackStrings;
+    private readonly Lazy<ResourceLoader?> _resourceLoader;
+    private readonly Lazy<Dictionary<string, string>> _fallbackStrings;
     private readonly ConcurrentDictionary<string, string> _resolvedStrings = new(StringComparer.Ordinal);
 
     public LocalizationService()
     {
-        _fallbackStrings = LoadFallbackReswDictionary();
+        _resourceLoader = new Lazy<ResourceLoader?>(CreateResourceLoader);
+        _fallbackStrings = new Lazy<Dictionary<string, string>>(LoadFallbackReswDictionary);
+    }
+
+    private static ResourceLoader? CreateResourceLoader()
+    {
         try
         {
-            _resourceLoader = new ResourceLoader();
+            return new ResourceLoader();
         }
         catch
         {
-            _resourceLoader = null;
+            return null;
         }
     }
 
@@ -43,11 +48,12 @@ public sealed class LocalizationService : ILocalizationService
 
     private string ResolveString(string key)
     {
-        if (_resourceLoader is not null)
+        ResourceLoader? resourceLoader = _resourceLoader.Value;
+        if (resourceLoader is not null)
         {
             try
             {
-                string candidate = _resourceLoader.GetString(key);
+                string candidate = resourceLoader.GetString(key);
                 if (!string.IsNullOrEmpty(candidate))
                 {
                     return candidate;
@@ -59,7 +65,7 @@ public sealed class LocalizationService : ILocalizationService
             }
         }
 
-        return _fallbackStrings.TryGetValue(key, out string? fallback) ? fallback : key;
+        return _fallbackStrings.Value.TryGetValue(key, out string? fallback) ? fallback : key;
     }
 
     public string Format(string key, params object[] args)

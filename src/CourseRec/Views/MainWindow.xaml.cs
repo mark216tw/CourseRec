@@ -2,9 +2,11 @@ using System.ComponentModel;
 using Com.VibeCode.CourseRec.Helpers;
 using Com.VibeCode.CourseRec.Interop;
 using Com.VibeCode.CourseRec.Models;
+using Com.VibeCode.CourseRec.Services;
 using Com.VibeCode.CourseRec.Services.Settings;
 using Com.VibeCode.CourseRec.ViewModels;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -23,6 +25,7 @@ public sealed partial class MainWindow : Window
 
     private readonly MainViewModel _viewModel;
     private readonly RecorderViewModel _recorderViewModel;
+    private readonly INavigationCoordinator _navigationCoordinator;
     private readonly ISettingsService _settingsService;
     private readonly ILocalizationService _localization;
     private readonly ILogger<MainWindow> _logger;
@@ -33,12 +36,14 @@ public sealed partial class MainWindow : Window
     public MainWindow(
         MainViewModel viewModel,
         RecorderViewModel recorderViewModel,
+        INavigationCoordinator navigationCoordinator,
         ISettingsService settingsService,
         ILocalizationService localization,
         ILogger<MainWindow> logger)
     {
         _viewModel = viewModel;
         _recorderViewModel = recorderViewModel;
+        _navigationCoordinator = navigationCoordinator;
         _settingsService = settingsService;
         _localization = localization;
         _logger = logger;
@@ -50,15 +55,25 @@ public sealed partial class MainWindow : Window
         ApplyWindowIcon();
         AppWindow.Closing += OnAppWindowClosing;
         AppWindow.Changed += OnAppWindowChanged;
-        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+        _navigationCoordinator.NavigationRequested += OnNavigationRequested;
         _recorderViewModel.PropertyChanged += OnRecorderViewModelPropertyChanged;
         Closed += OnMainWindowClosed;
 
-        SelectNavItemForKey(_settingsService.Current.LastPage);
         UpdateWindowTitle();
     }
 
     public nint WindowHandle => WindowNative.GetWindowHandle(this);
+
+    /// <summary>
+    /// 在視窗顯示後才導覽至起始頁面，避免頁面 XAML 建構延後首次可見時間。
+    /// </summary>
+    public void NavigateToInitialPage(NavigationPageKey pageKey)
+    {
+        if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => SelectNavItemForKey(pageKey)))
+        {
+            SelectNavItemForKey(pageKey);
+        }
+    }
 
     public Func<Task>? BeforeForceStopRecordingAsync { get; set; }
 
@@ -200,11 +215,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnNavigationRequested(object? sender, NavigationPageKey pageKey)
     {
-        if (e.PropertyName == nameof(MainViewModel.CurrentPage))
+        if (!DispatcherQueue.TryEnqueue(() => SelectNavItemForKey(pageKey)))
         {
-            DispatcherQueue.TryEnqueue(() => SelectNavItemForKey(_viewModel.CurrentPage));
+            SelectNavItemForKey(pageKey);
         }
     }
 
@@ -221,7 +236,7 @@ public sealed partial class MainWindow : Window
 
     private void OnMainWindowClosed(object sender, WindowEventArgs args)
     {
-        _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        _navigationCoordinator.NavigationRequested -= OnNavigationRequested;
         _recorderViewModel.PropertyChanged -= OnRecorderViewModelPropertyChanged;
     }
 
@@ -271,6 +286,8 @@ public sealed partial class MainWindow : Window
             "About" => NavigationPageKey.About,
             _ => NavigationPageKey.Recorder,
         };
+
+        _viewModel.CurrentPage = pageKey;
 
         Type targetPageType = pageKey switch
         {

@@ -28,7 +28,8 @@
 flowchart TB
     subgraph Presentation["簡報層 (Views / ViewModels)"]
         MW["MainWindow / NavigationView"]
-        RP["RecorderPage + MiniOverlayWindow"]
+        RP["RecorderPage"]
+        OV["MiniOverlayWindow"]
         LP["LibraryPage"]
         EP["EditorPage"]
         SP["SettingsPage / AboutPage"]
@@ -44,6 +45,7 @@ flowchart TB
         BS["Bookmark 服務"]
         SS["Settings／Theme 服務"]
         TS["Taskbar Indicator 服務"]
+        MOS["MiniOverlay 服務"]
     end
 
     subgraph Infrastructure["基礎設施層 (Interop / Helpers)"]
@@ -72,8 +74,8 @@ flowchart TB
 1. `Program.Main` 以具名 `Mutex` 確保單一實例；重複啟動時設定 `EventWaitHandle`，由既有執行緒帶回主視窗。
 2. 初始化 `ComWrappersSupport`，建立 `DispatcherQueueSynchronizationContext`，再啟動 `App`。
 3. `App` 以 `Host.CreateDefaultBuilder` 建立 DI 容器，載入 `appsettings.json`，設定 `FileLoggerProvider`。
-4. `OnLaunched` 啟動主機、載入設定、套用主題、建立 `MainWindow`、註冊全域快捷鍵與工作列指示。
-5. 關閉時同步等待 `Host.StopAsync`（上限 3 秒）並 `Dispose`，確保日誌佇列與錄影資源完成收尾。
+4. `OnLaunched` 啟動主機、載入設定、套用主題、建立 `MainWindow`、註冊全域快捷鍵與工作列指示；迷你控制列不隨啟動顯示，改由錄影工作台切換。
+5. 關閉時先關閉迷你控制列，再同步等待 `Host.StopAsync`（上限 3 秒）並 `Dispose`，確保日誌佇列與錄影資源完成收尾。
 6. 未處理例外：
    - UI 執行緒：`Application.UnhandledException` 顯示可複製診斷資訊的 `ContentDialog` 後結束。
    - 背景：`AppDomain.UnhandledException` 與 `TaskScheduler.UnobservedTaskException` 寫入日誌。
@@ -200,7 +202,7 @@ ViewModel 使用 `CommunityToolkit.Mvvm` 的 `ObservableObject`、`[ObservablePr
 
 ### 7.1 設定
 
-`%AppData%\CourseRec\settings.json`，由 `AppSettings` 序列化。包含輸出路徑、主題、預設情境／畫質、倒數、自動停止、視窗位置、懸浮列位置、檔名前綴、上次編輯影片與位置、快捷鍵等。
+`%AppData%\CourseRec\settings.json`，由 `AppSettings` 序列化。包含輸出路徑、主題、預設情境／畫質、倒數、自動停止、視窗位置、迷你控制列位置、檔名前綴、上次編輯影片與位置、快捷鍵等。
 
 局部更新（例如外觀或播放位置）在 I/O 鎖內執行「讀取→修改→寫入」，避免快速切換互相覆蓋。
 

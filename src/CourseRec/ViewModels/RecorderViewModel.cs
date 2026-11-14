@@ -20,7 +20,7 @@ using Microsoft.UI.Dispatching;
 namespace Com.VibeCode.CourseRec.ViewModels;
 
 /// <summary>
-/// 錄製工作台完整狀態機 ViewModel（整合螢幕／視窗擷取、雙軌混音、硬體編碼、暫停校正、書籤、快拍與懸浮列）。
+/// 錄製工作台完整狀態機 ViewModel（整合螢幕／視窗擷取、雙軌混音、硬體編碼、暫停校正、書籤、快拍與迷你控制列）。
 /// </summary>
 public sealed partial class RecorderViewModel : ObservableObject, IDisposable
 {
@@ -51,6 +51,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
     private long _lastBookmarkSaveTicks;
     private Timer? _housekeepingTimer;
     private bool _isInitialized;
+    private bool _idleServicesStarted;
     private bool _isDisposed;
     private bool _isApplyingDefaults;
     private bool _isKeepAwakeActive;
@@ -218,8 +219,6 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
 
     public event EventHandler? ToggleMiniOverlayRequested;
 
-    public event EventHandler? CloseMiniOverlayRequested;
-
     public ObservableCollection<SelectOption<QualityPreset>> QualityOptions { get; }
 
     public ObservableCollection<SelectOption<CaptureTargetKind>> CaptureKindOptions { get; }
@@ -287,9 +286,23 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         _isInitialized = true;
         ApplyDefaultsFromSettings(_settingsService.Current);
         _screenCaptureService.IsPreviewEnabled = IsLivePreviewEnabled;
+    }
+
+    /// <summary>
+    /// 在視窗顯示後才啟動來源枚舉、磁碟摘要與家務計時器，避免拖慢首次可見時間。
+    /// </summary>
+    public void StartIdleServices()
+    {
+        if (!_isInitialized || _isDisposed || _idleServicesStarted)
+        {
+            return;
+        }
+
+        _idleServicesStarted = true;
+        StartupTrace.Mark("閒置服務啟動");
         _ = RefreshTargetsAsync();
         UpdateDiskSpaceSummary();
-        _housekeepingTimer = new Timer(OnHousekeepingTick, null, 1500, 1500);
+        _housekeepingTimer ??= new Timer(OnHousekeepingTick, null, 1500, 1500);
     }
 
     /// <summary>
@@ -322,6 +335,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
             return;
         }
 
+        StartIdleServices();
         _isIdleCaptureSuspended = false;
         _screenCaptureService.IsPreviewEnabled = IsLivePreviewEnabled;
 
@@ -363,6 +377,11 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
             RecordingState.Finalizing => _localization.GetString("StateFinalizingText"),
             _ => StatusBadgeText,
         };
+
+        if (value == RecordingState.Idle)
+        {
+            ElapsedTimeText = "00:00:00";
+        }
 
         if (value is RecordingState.Recording or RecordingState.Paused)
         {
@@ -460,7 +479,11 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
             return;
         }
 
-        RestartPreviewAndAudioMonitor();
+        if (!_isIdleCaptureSuspended)
+        {
+            RestartPreviewAndAudioMonitor();
+        }
+
         UpdateDiskSpaceSummary();
     }
 
@@ -820,7 +843,6 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
                 await _audioCaptureService.StopMonitoringAsync();
             }
 
-            CloseMiniOverlayRequested?.Invoke(this, EventArgs.Empty);
             UpdateDiskSpaceSummary();
         }
     }

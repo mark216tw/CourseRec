@@ -471,6 +471,29 @@ public sealed class EditorAndLibraryTests : IDisposable
         Assert.False(editor.HasUnsavedChanges);
     }
 
+    [Fact]
+    public async Task EditorViewModel_LoadAnotherVideo_WithReplacementConfirmed_SkipsDiscardPrompt()
+    {
+        (EditorViewModel editor, _, _, _) = await CreateBookmarkEditorAsync();
+        string secondVideo = Path.Combine(_tempDir, "SecondCourse.mp4");
+        await File.WriteAllBytesAsync(secondVideo, [1, 2, 3, 4]);
+
+        editor.AudioGainPercent = 150;
+        Assert.True(editor.HasUnsavedChanges);
+
+        int prompts = 0;
+        editor.ConfirmDiscardEditsAsync = () =>
+        {
+            prompts++;
+            return Task.FromResult(false);
+        };
+
+        await editor.LoadVideoAsync(secondVideo, replacementConfirmed: true);
+        Assert.Equal(0, prompts);
+        Assert.Equal(secondVideo, editor.LoadedVideoPath);
+        Assert.False(editor.HasUnsavedChanges);
+    }
+
     private async Task<(EditorViewModel Editor, BookmarkService Service, string Video, BookmarkItem Bookmark)> CreateBookmarkEditorAsync()
     {
         var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"), new CourseRecDefaultOptions(), NullLogger<SettingsService>.Instance);

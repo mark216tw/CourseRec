@@ -149,5 +149,5 @@ docs/DEV_LOG.md                # 開發過程紀錄（必要）
 
 - 專案名稱：`CourseRec`（Windows 線上課程／會議錄影與快剪工具）
 - 命名空間／組件名稱：`Com.VibeCode.CourseRec`
-- 特殊需求：純 Windows 原生影音管線（`Windows.Graphics.Capture`、WASAPI / Process Loopback、Media Foundation `IMFSinkWriter`、`Windows.Media.Editing.MediaComposition`），免外掛 FFmpeg；支援防入鏡迷你懸浮控制列、雙音量表監控、書籤時間軸剪輯自動校正、MP4 影片與 AI 逐字稿專用 M4A 音訊匯出。
+- 特殊需求：純 Windows 原生影音管線（`Windows.Graphics.Capture`、WASAPI / Process Loopback、Media Foundation `IMFSinkWriter`、`Windows.Media.Editing.MediaComposition`），免外掛 FFmpeg；支援防入鏡迷你控制列、雙音量表監控、書籤時間軸剪輯自動校正、MP4 影片與 AI 逐字稿專用 M4A 音訊匯出。
 - 已知限制：僅支援 `x64` 架構（不支援 ARM64／x86）；單一視窗獨立錄音（Process Loopback）需 Windows 10 Build 20348 或 Windows 11 以上，舊版 Windows 10 自動降級為系統全體聲音擷取。

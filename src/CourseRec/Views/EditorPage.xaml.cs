@@ -132,6 +132,11 @@ public sealed partial class EditorPage : Page
 
         if (!ViewModel.HasLoadedVideo)
         {
+            if (ViewModel.IsLoadingVideo)
+            {
+                return;
+            }
+
             string? lastVideoPath = _settingsService.Current.LastEditorVideoPath;
             long lastPositionTicks = _settingsService.Current.LastEditorPositionTicks;
             if (!string.IsNullOrWhiteSpace(lastVideoPath) && File.Exists(lastVideoPath))

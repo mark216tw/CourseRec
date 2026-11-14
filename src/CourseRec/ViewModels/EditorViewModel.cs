@@ -124,7 +124,7 @@ public sealed partial class EditorViewModel : ObservableObject
 
         navigationCoordinator.OpenVideoInEditorRequested += async (_, path) =>
         {
-            await LoadVideoAsync(path);
+            await LoadVideoAsync(path, replacementConfirmed: true);
         };
         navigationCoordinator.ReleaseVideoFileRequested += (_, path) => ReleaseIfMatching(path);
         navigationCoordinator.VideoFileRenamed += (_, args) => HandleVideoFileRenamed(args.OldPath, args.NewPath);
@@ -251,7 +251,7 @@ public sealed partial class EditorViewModel : ObservableObject
         }
     }
 
-    public async Task LoadVideoAsync(string videoFilePath)
+    public async Task LoadVideoAsync(string videoFilePath, bool replacementConfirmed = false)
     {
         if (!CanOpenVideo)
         {
@@ -267,6 +267,7 @@ public sealed partial class EditorViewModel : ObservableObject
         bool isDifferentVideo = !string.Equals(videoFilePath, LoadedVideoPath, StringComparison.OrdinalIgnoreCase);
         if (HasUnsavedChanges
             && isDifferentVideo
+            && !replacementConfirmed
             && ConfirmDiscardEditsAsync is not null
             && !await ConfirmDiscardEditsAsync())
         {
@@ -716,28 +717,36 @@ public sealed partial class EditorViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenCompletedExport() => RunCompletedExportAction(reveal: false);
-
-    [RelayCommand]
-    private void RevealCompletedExport() => RunCompletedExportAction(reveal: true);
-
-    private void RunCompletedExportAction(bool reveal)
+    private void OpenCompletedExport()
     {
         try
         {
-            if (reveal)
-            {
-                FileActionHelper.Reveal(CompletedExportPath);
-            }
-            else
-            {
-                FileActionHelper.Open(CompletedExportPath);
-            }
+            FileActionHelper.Open(CompletedExportPath);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "開啟匯出結果失敗");
             ShowBanner(_localization.GetString("ResultFileActionFailedText"), InfoBarSeverity.Error);
+        }
+    }
+
+    [RelayCommand]
+    private void OpenExportFolder()
+    {
+        try
+        {
+            string outputDir = _settingsService.Current.OutputDirectory;
+            Directory.CreateDirectory(outputDir);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = outputDir,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "開啟匯出資料夾失敗");
+            ShowBanner(_localization.GetString("ExportFolderOpenFailedText"), InfoBarSeverity.Error);
         }
     }
 

@@ -34,9 +34,11 @@ public partial class App : Application
 
     public App()
     {
+        StartupTrace.Mark("App 建構開始");
         InitializeComponent();
+        StartupTrace.Mark("App XAML 資源載入完成");
 
-        _host = Host.CreateDefaultBuilder()
+        _host = new HostBuilder()
             .UseContentRoot(AppContext.BaseDirectory)
             .ConfigureAppConfiguration((_, config) =>
             {
@@ -65,6 +67,7 @@ public partial class App : Application
                 services.AddSingleton<IBookmarkService, BookmarkService>();
                 services.AddSingleton<IGlobalHotkeyService, GlobalHotkeyService>();
                 services.AddSingleton<ITaskbarIndicatorService, TaskbarIndicatorService>();
+                services.AddSingleton<IMiniOverlayService, MiniOverlayService>();
 
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<RecorderViewModel>();
@@ -77,9 +80,11 @@ public partial class App : Application
             })
             .Build();
 
+        StartupTrace.Mark("主機建置完成");
         UnhandledException += OnAppUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+        FlushStartupTrace();
     }
 
     public static T GetService<T>()
@@ -122,34 +127,61 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+        StartupTrace.Mark("OnLaunched 開始");
         await _host.StartAsync();
+        StartupTrace.Mark("主機啟動完成");
 
         ISettingsService settingsService = GetService<ISettingsService>();
         AppSettings settings = await settingsService.LoadAsync();
+        StartupTrace.Mark("設定載入完成");
 
         IThemeService themeService = GetService<IThemeService>();
         themeService.ApplyTheme(settings.DisplayMode, settings.ColorTheme);
-        GetService<SettingsViewModel>().SyncFromSettings(settings);
 
         _mainWindow = GetService<MainWindow>();
-        ClipboardHelper.Initialize(_mainWindow.DispatcherQueue);
+        StartupTrace.Mark("主視窗建構完成");
+
         _mainWindow.BeforeForceStopRecordingAsync = () => GetService<RecorderViewModel>().StopRecordingAsync();
         GetService<EditorViewModel>().ConfirmDiscardEditsAsync = _mainWindow.ConfirmDiscardEditorChangesAsync;
+        _mainWindow.Closed += OnMainWindowClosed;
+
+        themeService.RegisterWindow(_mainWindow);
+        StartupTrace.Mark("主題註冊完成");
+
+        _mainWindow.Activate();
+        StartupTrace.Mark("視窗 Activate");
+
+        // 視窗顯示後才進行非必要初始化，縮短首次可見時間；頁面導覽同樣延後到下一輪。
         RecorderViewModel recorderViewModel = GetService<RecorderViewModel>();
         recorderViewModel.AttachDispatcher(_mainWindow.DispatcherQueue);
+        recorderViewModel.StartIdleServices();
         if (settings.LastPage != NavigationPageKey.Recorder)
         {
             recorderViewModel.SuspendIdleCapture();
         }
 
-        _mainWindow.Closed += OnMainWindowClosed;
-        themeService.RegisterWindow(_mainWindow);
-        _mainWindow.Activate();
+        ClipboardHelper.Initialize(_mainWindow.DispatcherQueue);
+        _mainWindow.NavigateToInitialPage(settings.LastPage);
         GetService<ITaskbarIndicatorService>().AttachWindow(_mainWindow.WindowHandle);
 
         IGlobalHotkeyService hotkeyService = GetService<IGlobalHotkeyService>();
         hotkeyService.AttachWindow(_mainWindow.WindowHandle);
         hotkeyService.ApplyHotkeys(settings);
+
+        StartupTrace.Mark("啟動後初始化完成");
+        FlushStartupTrace();
+    }
+
+    private void FlushStartupTrace()
+    {
+        try
+        {
+            StartupTrace.Flush(_host.Services.GetRequiredService<ILogger<App>>());
+        }
+        catch
+        {
+            // 日誌服務尚未就緒時不影響啟動流程。
+        }
     }
 
     private void OnMainWindowClosed(object sender, WindowEventArgs args)
@@ -161,6 +193,15 @@ public partial class App : Application
         if (Interlocked.Exchange(ref _isShuttingDown, 1) != 0)
         {
             return;
+        }
+
+        try
+        {
+            GetService<IMiniOverlayService>().Close();
+        }
+        catch (Exception ex)
+        {
+            TryLogFatal(ex, "關閉迷你控制列");
         }
 
         try

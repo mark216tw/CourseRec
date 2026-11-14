@@ -19,10 +19,15 @@ using WinRT.Interop;
 namespace Com.VibeCode.CourseRec.Views;
 
 /// <summary>
-/// 迷你懸浮錄影控制列（支援透過 <c>WDA_EXCLUDEFROMCAPTURE</c> 排除自身入鏡）。
+/// 迷你錄影控制列（支援透過 <c>WDA_EXCLUDEFROMCAPTURE</c> 排除自身入鏡）。
 /// </summary>
 public sealed partial class MiniOverlayWindow : Window
 {
+    private const double FallbackWidthDip = 240;
+    private const double FallbackHeightDip = 40;
+    private const double DefaultDpi = 96d;
+    private const int SizeTolerancePixels = 2;
+
     private readonly ILogger<MiniOverlayWindow> _logger;
     private readonly ISettingsService _settingsService;
 
@@ -49,6 +54,10 @@ public sealed partial class MiniOverlayWindow : Window
         ConfigureCompactTopMostWindow();
         SetExcludeFromCapture(excludeFromCapture);
         ApplyWindowIcon();
+
+        // 第一幀尚未完成尺寸與位置校正前先隱藏內容，避免預設大視窗短暫出現後才縮小。
+        RootBorder.Opacity = 0;
+        PrepareInitialBounds();
 
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
         Closed += OnWindowClosed;
@@ -89,8 +98,15 @@ public sealed partial class MiniOverlayWindow : Window
 
     private void OnRootBorderLoaded(object sender, RoutedEventArgs e)
     {
-        ResizeWindowToContent();
-        RestorePositionIfNeeded();
+        try
+        {
+            ResizeWindowToContent();
+            RestorePositionIfNeeded();
+        }
+        finally
+        {
+            RootBorder.Opacity = 1;
+        }
     }
 
     private void OnRootBorderSizeChanged(object sender, SizeChangedEventArgs e)
@@ -131,7 +147,8 @@ public sealed partial class MiniOverlayWindow : Window
         int height = Math.Max(1, (int)Math.Ceiling(desired.Height * scale));
 
         SizeInt32 current = AppWindow.ClientSize;
-        if (Math.Abs(current.Width - width) <= 2 && Math.Abs(current.Height - height) <= 2)
+        if (Math.Abs(current.Width - width) <= SizeTolerancePixels
+            && Math.Abs(current.Height - height) <= SizeTolerancePixels)
         {
             return;
         }
@@ -145,6 +162,90 @@ public sealed partial class MiniOverlayWindow : Window
         {
             _isResizing = false;
         }
+    }
+
+    private void PrepareInitialBounds()
+    {
+        MiniOverlayPosition? saved = _settingsService.Current.MiniOverlayPosition;
+        try
+        {
+            if (saved is not null)
+            {
+                AppWindow.Move(new PointInt32(saved.Left, saved.Top));
+            }
+
+            double scale = GetRasterizationScale();
+            Size naturalDip = MeasureNaturalDip();
+            bool hasSavedSize = saved is { WidthDip: > 0, HeightDip: > 0 };
+            double widthDip = hasSavedSize ? saved!.WidthDip : naturalDip.Width;
+            double heightDip = hasSavedSize ? saved!.HeightDip : naturalDip.Height;
+
+            int width = Math.Max(1, (int)Math.Ceiling(widthDip * scale));
+            int height = Math.Max(1, (int)Math.Ceiling(heightDip * scale));
+            AppWindow.ResizeClient(new SizeInt32(width, height));
+
+            if (saved is not null)
+            {
+                (int left, int top) = ClampToWorkArea(saved.Left, saved.Top, AppWindow.Size);
+                AppWindow.Move(new PointInt32(left, top));
+                _hasRestoredPosition = true;
+                _lastSavedPosition = hasSavedSize
+                    ? new MiniOverlayPosition(
+                        left,
+                        top,
+                        Math.Round(width / scale, 2),
+                        Math.Round(height / scale, 2))
+                    : null;
+            }
+            else
+            {
+                _hasRestoredPosition = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "預先設定迷你控制列大小與位置失敗");
+        }
+    }
+
+    private Size MeasureNaturalDip()
+    {
+        try
+        {
+            RootBorder.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Size desired = RootBorder.DesiredSize;
+            if (desired.Width > 0 && desired.Height > 0)
+            {
+                return desired;
+            }
+        }
+        catch
+        {
+            // 尚未載入視覺樹時量測可能失敗，改用預設尺寸。
+        }
+
+        return new Size(FallbackWidthDip, FallbackHeightDip);
+    }
+
+    private double GetRasterizationScale()
+    {
+        double scale = RootBorder.XamlRoot?.RasterizationScale ?? 0d;
+        if (scale <= 0)
+        {
+            uint dpi = WindowNativeMethods.GetDpiForWindow(WindowHandle);
+            scale = dpi > 0 ? dpi / DefaultDpi : 1d;
+        }
+
+        return scale;
+    }
+
+    private static (int Left, int Top) ClampToWorkArea(int left, int top, SizeInt32 size)
+    {
+        var desired = new RectInt32(left, top, size.Width, size.Height);
+        RectInt32 workArea = DisplayArea.GetFromRect(desired, DisplayAreaFallback.Nearest).WorkArea;
+        int maxLeft = Math.Max(workArea.X, workArea.X + workArea.Width - size.Width);
+        int maxTop = Math.Max(workArea.Y, workArea.Y + workArea.Height - size.Height);
+        return (Math.Clamp(left, workArea.X, maxLeft), Math.Clamp(top, workArea.Y, maxTop));
     }
 
     private void RestorePositionIfNeeded()
@@ -161,16 +262,9 @@ public sealed partial class MiniOverlayWindow : Window
             return;
         }
 
-        SizeInt32 size = AppWindow.Size;
-        var desired = new RectInt32(saved.Left, saved.Top, size.Width, size.Height);
-        RectInt32 workArea = DisplayArea.GetFromRect(desired, DisplayAreaFallback.Nearest).WorkArea;
-        int maxLeft = Math.Max(workArea.X, workArea.X + workArea.Width - size.Width);
-        int maxTop = Math.Max(workArea.Y, workArea.Y + workArea.Height - size.Height);
-        int left = Math.Clamp(desired.X, workArea.X, maxLeft);
-        int top = Math.Clamp(desired.Y, workArea.Y, maxTop);
-
+        (int left, int top) = ClampToWorkArea(saved.Left, saved.Top, AppWindow.Size);
         AppWindow.Move(new PointInt32(left, top));
-        _lastSavedPosition = new MiniOverlayPosition(left, top);
+        _lastSavedPosition = new MiniOverlayPosition(left, top, saved.WidthDip, saved.HeightDip);
     }
 
     private async Task PersistPositionAsync()
@@ -178,7 +272,13 @@ public sealed partial class MiniOverlayWindow : Window
         try
         {
             PointInt32 position = AppWindow.Position;
-            var current = new MiniOverlayPosition(position.X, position.Y);
+            SizeInt32 clientSize = AppWindow.ClientSize;
+            double scale = GetRasterizationScale();
+            var current = new MiniOverlayPosition(
+                position.X,
+                position.Y,
+                Math.Round(clientSize.Width / scale, 2),
+                Math.Round(clientSize.Height / scale, 2));
             if (current == _lastSavedPosition)
             {
                 return;
@@ -290,13 +390,8 @@ public sealed partial class MiniOverlayWindow : Window
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "從懸浮列停止錄影失敗");
+            _logger.LogError(ex, "從迷你控制列停止錄影失敗");
         }
-    }
-
-    private void OnExpandMainWindowClicked(object sender, RoutedEventArgs e)
-    {
-        ShowMainWindow();
     }
 
     private void OnCloseOverlayClicked(object sender, RoutedEventArgs e)

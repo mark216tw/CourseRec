@@ -17,6 +17,11 @@ public sealed class ThemeService : IThemeService
         [AppColorTheme.Forest] = "ms-appx:///Styles/Themes/ForestTheme.xaml",
         [AppColorTheme.Sunset] = "ms-appx:///Styles/Themes/SunsetTheme.xaml",
         [AppColorTheme.Lavender] = "ms-appx:///Styles/Themes/LavenderTheme.xaml",
+        [AppColorTheme.Rose] = "ms-appx:///Styles/Themes/RoseTheme.xaml",
+        [AppColorTheme.Mint] = "ms-appx:///Styles/Themes/MintTheme.xaml",
+        [AppColorTheme.Graphite] = "ms-appx:///Styles/Themes/GraphiteTheme.xaml",
+        [AppColorTheme.Cocoa] = "ms-appx:///Styles/Themes/CocoaTheme.xaml",
+        [AppColorTheme.Indigo] = "ms-appx:///Styles/Themes/IndigoTheme.xaml",
     };
 
     private readonly List<WindowThemeState> _windows = [];
@@ -74,6 +79,7 @@ public sealed class ThemeService : IThemeService
             return;
         }
 
+        bool isFirstApplication = !state.HasAppliedTheme;
         bool paletteChanged = state.AppliedColorTheme != colorTheme || state.AppliedCustomTheme is null;
         if (paletteChanged)
         {
@@ -96,6 +102,8 @@ public sealed class ThemeService : IThemeService
             state.AppliedColorTheme = colorTheme;
         }
 
+        state.HasAppliedTheme = true;
+
         ElementTheme requestedTheme = displayMode switch
         {
             AppDisplayMode.Light => ElementTheme.Light,
@@ -105,7 +113,8 @@ public sealed class ThemeService : IThemeService
 
         rootElement.RequestedTheme = requestedTheme;
 
-        if (paletteChanged)
+        // 新視窗首次套用時整棵樹尚無舊主題資源，不需再以反向主題強制刷新。
+        if (paletteChanged && !isFirstApplication)
         {
             ElementTheme oppositeTheme = rootElement.ActualTheme == ElementTheme.Light
                 ? ElementTheme.Dark
@@ -147,5 +156,7 @@ public sealed class ThemeService : IThemeService
         public ResourceDictionary? AppliedCustomTheme { get; set; }
 
         public AppColorTheme? AppliedColorTheme { get; set; }
+
+        public bool HasAppliedTheme { get; set; }
     }
 }

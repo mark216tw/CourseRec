@@ -1,3 +1,386 @@
+# CourseRec v1.5.3 版本說明
+
+本次更新統一主題顏色色塊大小。
+
+## 下載
+
+- `CourseRec-1.5.3-win-x64-framework-dependent.zip`
+- `CourseRec-1.5.3-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **色塊大小一致**：主題顏色按鈕顯示的目前選取色塊，現在與選單中的色塊同為 44x24。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.5.2 版本說明
+
+本次更新修正主題顏色色塊的對齊。
+
+## 下載
+
+- `CourseRec-1.5.2-win-x64-framework-dependent.zip`
+- `CourseRec-1.5.2-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **色塊置中**：主題顏色面板中的色塊現在會在欄位內水平與垂直置中，不再偏向下方。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.5.1 版本說明
+
+本次更新精簡主題顏色面板。
+
+## 下載
+
+- `CourseRec-1.5.1-win-x64-framework-dependent.zip`
+- `CourseRec-1.5.1-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **一次看到所有主題顏色**：色塊面板改為每列 5 個、共 2 列，縮小色塊並移除卷軸，10 種顏色可直接選取。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.5.0 版本說明
+
+本次更新優化主題配色，並改用飛出式色塊選單。
+
+## 下載
+
+- `CourseRec-1.5.0-win-x64-framework-dependent.zip`
+- `CourseRec-1.5.0-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **色塊選單更好選**：主題顏色改為按鈕搭配飛出式色塊面板，點選色塊立即套用並關閉。
+- **配色更清楚**：調整海洋藍、暖陽橘與可可棕，並以靛藍取代天空藍，讓 10 種主題更容易分辨。
+- **設定無痛轉移**：舊版天空藍設定會自動改用靛藍。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.4.1 版本說明
+
+本次更新調整主題顏色選單的呈現方式。
+
+## 下載
+
+- `CourseRec-1.4.1-win-x64-framework-dependent.zip`
+- `CourseRec-1.4.1-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **主題顏色改用色塊呈現**：下拉選單只顯示各主題的背景色與強調色漸層色塊，不再顯示顏色名稱，選擇更直覺。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.4.0 版本說明
+
+本次更新擴充主題顏色選擇。
+
+## 下載
+
+- `CourseRec-1.4.0-win-x64-framework-dependent.zip`
+- `CourseRec-1.4.0-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **更多主題顏色**：新增玫瑰粉、薄荷綠、石墨灰、可可棕與天空藍，連同原有選項共 10 種主題顏色，且皆支援淺色與深色色階。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.3.8 版本說明
+
+本次更新修正停止錄影後的計時顯示。
+
+## 下載
+
+- `CourseRec-1.3.8-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.8-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **待命時間歸零**：停止錄影回到待命後，迷你控制列與工作台顯示的錄影時間會回到 `00:00:00`，不會再停留在上一段的長度。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.3.7 版本說明
+
+本次更新調整迷你控制列的焦點行為。
+
+## 下載
+
+- `CourseRec-1.3.7-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.7-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **焦點留在迷你控制列**：從錄影工作台開啟迷你控制列後，可直接用列上的按鈕暫停、停止、打書籤或快拍，不需再點一下控制列。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.3.6 版本說明
+
+本次更新修正迷你控制列開啟時由大變小造成的畫面閃爍。
+
+## 下載
+
+- `CourseRec-1.3.6-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.6-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **開啟控制列不再閃爍**：迷你控制列會在顯示前先套用上次的位置與大小，不會再先出現大視窗後才縮小。
+- **版面完成才顯示**：內容會等到尺寸與位置校正完成後才呈現，避免看到中間過程。
+- **不同 DPI 保持一致**：控制列大小改以 DIP 儲存，縮放比例變更後仍維持相同視覺大小。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.3.5 版本說明
+
+本次更新修正開啟迷你控制列時主視窗閃爍的問題，並調整迷你控制列的顯示方式與按鈕配置。
+
+## 下載
+
+- `CourseRec-1.3.5-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.5-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **開啟控制列不閃爍**：從錄影工作台開啟迷你控制列後，焦點會立即回到主視窗，主畫面不再閃一下。
+- **啟動畫面更單純**：開啟 CourseRec 時不再自動顯示迷你控制列，需要時再從錄影工作台切換。
+- **關閉程式仍自動收合**：關閉 CourseRec 時，已開啟的迷你控制列會一起關閉。
+- **控制列更精簡**：移除「開啟主視窗」按鈕，需要回到主視窗時可從錄影工作台操作。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.3.4 版本說明
+
+本次更新修正檔案庫開啟快剪的導覽問題，並調整快剪頁的文字與匯出按鈕配置。
+
+## 下載
+
+- `CourseRec-1.3.4-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.4-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **開啟快剪更順暢**：編輯器已有影片時，從錄影檔案庫點「快剪與複習」會正確切換到快剪頁，並先詢問是否取代目前影片。
+- **匯出操作更集中**：「開啟剛完成的匯出影片」與「開啟匯出目錄」移到匯出按鈕旁；匯出目錄改為資料夾圖示，隨時可開啟。
+- **文案更清楚**：「標記剪除終點」、「擷取當前畫面為PNG」、「匯出M4A純音訊」等按鈕文字同步更新。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+## 升級方式
+
+1. 關閉舊版 CourseRec。
+2. 將新版壓縮檔解壓縮並覆蓋舊版資料夾（建議先備份）。
+3. 個人設定與錄影檔案不受影響，會沿用 `%AppData%\CourseRec` 與輸出資料夾。
+
+---
+
+# CourseRec v1.3.3 版本說明
+
+本次更新修正迷你控制列啟動時內容空白的問題。
+
+## 下載
+
+- `CourseRec-1.3.3-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.3-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **啟動即顯示狀態**：迷你控制列開啟後立即顯示「待命中」、錄影時間與音量資料，不需再點擊視窗。
+- **焦點留在主視窗**：程式啟動時自動顯示迷你控制列後，焦點會回到主視窗，操作不中斷。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+## 升級方式
+
+1. 關閉舊版 CourseRec。
+2. 將新版壓縮檔解壓縮並覆蓋舊版資料夾（建議先備份）。
+3. 個人設定與錄影檔案不受影響，會沿用 `%AppData%\CourseRec` 與輸出資料夾。
+
+---
+
+# CourseRec v1.3.2 版本說明
+
+本次更新調整迷你控制列的名稱與生命週期，並縮小整體尺寸，讓錄影操作更順手。
+
+## 下載
+
+- `CourseRec-1.3.2-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.2-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **名稱更直覺**：「迷你懸浮控制列」正式更名為「迷你控制列」，所有介面文字同步更新。
+- **隨程式自動開關**：啟動 CourseRec 時自動顯示迷你控制列，關閉程式時自動關閉。
+- **停止錄影後保持待命**：錄影停止後迷你控制列仍留在畫面上，方便下一段錄影快速操作。
+- **尺寸更精簡**：縮小按鈕、間距、指示燈與音量條，降低迷你控制列所占面積。
+- **設定即時生效**：切換「排除迷你控制列擷取」時，已開啟的迷你控制列會立即套用。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+## 升級方式
+
+1. 關閉舊版 CourseRec。
+2. 將新版壓縮檔解壓縮並覆蓋舊版資料夾（建議先備份）。
+3. 個人設定與錄影檔案不受影響，會沿用 `%AppData%\CourseRec` 與輸出資料夾。
+
+---
+
+# CourseRec v1.3.1 版本說明
+
+本次更新聚焦於啟動速度：主視窗會更快出現，即時預覽與音量表在第一幀後才接手。
+
+## 下載
+
+- `CourseRec-1.3.1-win-x64-framework-dependent.zip`
+- `CourseRec-1.3.1-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **視窗更快出現**：啟動時先顯示主視窗，再載入初始頁面，減少等待感。
+- **預覽延後接手**：螢幕擷取與音量監控在第一幀後啟動，不阻塞視窗顯示。
+- **初始化更精簡**：影音編碼與多語系資源改為需要時才初始化。
+- **啟動耗時記錄**：日誌會記錄各啟動階段耗時，方便回報效能問題。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+## 升級方式
+
+1. 關閉舊版 CourseRec。
+2. 將新版本解壓縮到新資料夾（或覆蓋舊版程式檔）。
+3. 個人設定與錄影檔不受影響，會沿用 `%AppData%\CourseRec` 與原輸出資料夾。
+
+## 已知限制
+
+- ARM64 版本已完成建置與封裝，尚未於實機廣泛驗證。
+- 未提供安裝程式與程式碼簽章，首次執行可能出現 SmartScreen 提示。
+- 尚未支援 x86 與 Windows 10 1809 以下的系統。
+
+---
+
 # CourseRec v1.3.0 版本說明
 
 本次更新聚焦於文件完備、授權明確與 ARM64 發行支援，並提供 x64／ARM64 兩種非 Self-Contained 壓縮檔。

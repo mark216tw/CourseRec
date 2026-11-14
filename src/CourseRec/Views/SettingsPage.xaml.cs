@@ -26,6 +26,11 @@ public sealed partial class SettingsPage : Page
 
     public SettingsViewModel ViewModel { get; }
 
+    private void OnColorThemeItemClick(object sender, ItemClickEventArgs e)
+    {
+        ColorThemeFlyout.Hide();
+    }
+
     private async void OnBrowseOutputDirectoryClicked(object sender, RoutedEventArgs e)
     {
         if (Application.Current is not App { MainWindowInstance: MainWindow mainWindow })

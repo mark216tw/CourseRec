@@ -4,17 +4,17 @@
 
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
-            <Color x:Key="AppBackgroundColor">#FFE3F0FA</Color>
+            <Color x:Key="AppBackgroundColor">#FFE7EEF9</Color>
             <Color x:Key="CardSurfaceColor">#FFFFFFFF</Color>
-            <Color x:Key="CardSubtleSurfaceColor">#FFCFE5F7</Color>
-            <Color x:Key="CardStrokeColor">#FF9CC9E8</Color>
-            <Color x:Key="PrimaryTextColor">#FF0B2239</Color>
-            <Color x:Key="SecondaryTextColor">#FF36536B</Color>
-            <Color x:Key="BrandAccentColor">#FF0277BD</Color>
+            <Color x:Key="CardSubtleSurfaceColor">#FFD3E0F2</Color>
+            <Color x:Key="CardStrokeColor">#FFA6BEE0</Color>
+            <Color x:Key="PrimaryTextColor">#FF0A1C33</Color>
+            <Color x:Key="SecondaryTextColor">#FF354F6B</Color>
+            <Color x:Key="BrandAccentColor">#FF0D47A1</Color>
             <Color x:Key="RecordingActiveColor">#FFC62828</Color>
             <Color x:Key="RecordingPausedColor">#FFC77700</Color>
             <Color x:Key="MeterSafeColor">#FF1B7F3A</Color>
-            <Color x:Key="PreviewBackdropColor">#FF071A2A</Color>
+            <Color x:Key="PreviewBackdropColor">#FF061428</Color>
             <Color x:Key="OverlayBackgroundColor">#F2FFFFFF</Color>
 
             <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackgroundColor}" />
@@ -32,18 +32,18 @@
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
-            <Color x:Key="AppBackgroundColor">#FF04121D</Color>
-            <Color x:Key="CardSurfaceColor">#FF0A2233</Color>
-            <Color x:Key="CardSubtleSurfaceColor">#FF11364D</Color>
-            <Color x:Key="CardStrokeColor">#FF1C4B66</Color>
-            <Color x:Key="PrimaryTextColor">#FFEAF6FF</Color>
-            <Color x:Key="SecondaryTextColor">#FF8DB5CC</Color>
-            <Color x:Key="BrandAccentColor">#FF29B6F6</Color>
+            <Color x:Key="AppBackgroundColor">#FF030D1C</Color>
+            <Color x:Key="CardSurfaceColor">#FF0A1B33</Color>
+            <Color x:Key="CardSubtleSurfaceColor">#FF12294A</Color>
+            <Color x:Key="CardStrokeColor">#FF1D3B63</Color>
+            <Color x:Key="PrimaryTextColor">#FFE8F0FB</Color>
+            <Color x:Key="SecondaryTextColor">#FF9BB4D4</Color>
+            <Color x:Key="BrandAccentColor">#FF5C9BE5</Color>
             <Color x:Key="RecordingActiveColor">#FFEF5350</Color>
             <Color x:Key="RecordingPausedColor">#FFFFA726</Color>
             <Color x:Key="MeterSafeColor">#FF66BB6A</Color>
-            <Color x:Key="PreviewBackdropColor">#FF020A11</Color>
-            <Color x:Key="OverlayBackgroundColor">#F20A2233</Color>
+            <Color x:Key="PreviewBackdropColor">#FF01060F</Color>
+            <Color x:Key="OverlayBackgroundColor">#F20A1B33</Color>
 
             <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackgroundColor}" />
             <SolidColorBrush x:Key="CardSurfaceBrush" Color="{StaticResource CardSurfaceColor}" />
@@ -60,18 +60,18 @@
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Default">
-            <Color x:Key="AppBackgroundColor">#FF04121D</Color>
-            <Color x:Key="CardSurfaceColor">#FF0A2233</Color>
-            <Color x:Key="CardSubtleSurfaceColor">#FF11364D</Color>
-            <Color x:Key="CardStrokeColor">#FF1C4B66</Color>
-            <Color x:Key="PrimaryTextColor">#FFEAF6FF</Color>
-            <Color x:Key="SecondaryTextColor">#FF8DB5CC</Color>
-            <Color x:Key="BrandAccentColor">#FF29B6F6</Color>
+            <Color x:Key="AppBackgroundColor">#FF030D1C</Color>
+            <Color x:Key="CardSurfaceColor">#FF0A1B33</Color>
+            <Color x:Key="CardSubtleSurfaceColor">#FF12294A</Color>
+            <Color x:Key="CardStrokeColor">#FF1D3B63</Color>
+            <Color x:Key="PrimaryTextColor">#FFE8F0FB</Color>
+            <Color x:Key="SecondaryTextColor">#FF9BB4D4</Color>
+            <Color x:Key="BrandAccentColor">#FF5C9BE5</Color>
             <Color x:Key="RecordingActiveColor">#FFEF5350</Color>
             <Color x:Key="RecordingPausedColor">#FFFFA726</Color>
             <Color x:Key="MeterSafeColor">#FF66BB6A</Color>
-            <Color x:Key="PreviewBackdropColor">#FF020A11</Color>
-            <Color x:Key="OverlayBackgroundColor">#F20A2233</Color>
+            <Color x:Key="PreviewBackdropColor">#FF01060F</Color>
+            <Color x:Key="OverlayBackgroundColor">#F20A1B33</Color>
 
             <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackgroundColor}" />
             <SolidColorBrush x:Key="CardSurfaceBrush" Color="{StaticResource CardSurfaceColor}" />

@@ -4,6 +4,382 @@
 
 ---
 
+## 2026-11-14 - v1.5.3
+
+### 目標
+讓主題顏色按鈕顯示的選取色塊與選單中的色塊大小一致。
+
+### 變更
+- `Views/SettingsPage.xaml`：移除按鈕專用的 64x28 色塊樣板，改用與選單相同的 44x24 `ColorThemeSwatchTemplate`。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.5.3（`AssemblyVersion` 維持 1.5.0.0）。
+- `docs/BUILD.md`：發行與 Release 範例版本更新為 1.5.3，`AssemblyVersion` 範例同步為 1.5.0.0。
+- `docs/USER_GUIDE.md`：色彩主題說明補齊 10 種主題名稱。
+
+### 問題與解法
+- 按鈕色塊原本使用獨立樣板，尺寸比選單色塊大；改為共用同一樣板後即可保持一致。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：63/63 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：無格式差異（僅出現工作區載入警告）。
+
+### 待辦
+- 尚未人工確認按鈕與選單色塊在淺色／深色下大小與位置一致。
+
+---
+
+## 2026-11-14 - v1.5.2
+
+### 目標
+修正主題顏色色塊在選單中靠下、未置中的問題。
+
+### 變更
+- `Views/SettingsPage.xaml`：為 `GridView` 加入 `ItemContainerStyle`，覆寫預設 `MinHeight`、`Margin` 並將內容水平／垂直置中；色塊本身也加上 `HorizontalAlignment`／`VerticalAlignment`。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.5.2（`AssemblyVersion` 維持 1.5.0.0）。
+
+### 問題與解法
+- `GridViewItem` 預設 `MinHeight` 大於 `ItemsWrapGrid.ItemHeight`，且預設留有邊距，導致色塊被推到欄位下方。改以 `DefaultGridViewItemStyle` 為基礎覆寫尺寸與對齊後恢復置中。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：63/63 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：無格式差異（僅出現工作區載入警告）。
+
+### 待辦
+- 尚未人工確認色塊在淺色／深色下皆完全置中。
+
+---
+
+## 2026-11-14 - v1.5.1
+
+### 目標
+精簡主題顏色面板，讓 10 種顏色一次顯示且不出現卷軸。
+
+### 變更
+- `Views/SettingsPage.xaml`：色塊縮小為 44x24，按鈕色塊為 64x28；面板改為 5 欄 x 2 列，關閉水平與垂直捲動，並縮小面板間距與寬度。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.5.1（`AssemblyVersion` 維持 1.5.0.0）。
+
+### 問題與解法
+- 無。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：63/63 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：無格式差異（僅出現工作區載入警告）。
+
+### 待辦
+- 尚未人工確認面板在淺色／深色下是否完整顯示 10 種顏色且無卷軸。
+
+---
+
+## 2026-11-14 - v1.5.0
+
+### 目標
+優化相近的主題配色，並將主題顏色下拉選單改為飛出式色塊面板。
+
+### 變更
+- `Models/AppColorTheme.cs`：新增 `Indigo`，`Sky` 標記為已停用並保留舊設定讀取相容。
+- `Services/Settings/SettingsService.cs`：載入舊設定時將 `Sky` 自動轉為 `Indigo`。
+- `Services/Settings/ThemeService.cs`：以 `IndigoTheme.xaml` 取代 `SkyTheme.xaml`。
+- `Styles/Themes/`：新增 `IndigoTheme.xaml`，移除 `SkyTheme.xaml`；調整 `OceanTheme.xaml`、`SunsetTheme.xaml`、`CocoaTheme.xaml` 的淺色與深色配色。
+- `Models/ColorThemeOption.cs`、`ViewModels/SettingsViewModel.cs`：色塊改為單一強調色，並更新 10 種主題的強調色。
+- `Views/SettingsPage.xaml`：以「目前色塊按鈕 + `Flyout`」取代 ComboBox；面板內以 `GridView` 顯示色塊，點選後立即套用並關閉。
+- `Views/SettingsPage.xaml.cs`：新增 `OnColorThemeItemClick` 關閉飛出面板。
+- `Strings/zh-Hant/Resources.resw`：新增主題顏色按鈕、飛出面板與色塊清單字串，將天空藍改為靛藍。
+- `tests/CourseRec.Tests/SettingsServiceTests.cs`：新增天空藍遷移為靛藍的測試。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.5.0。
+
+### 問題與解法
+- 驗證一般輸出建置時 `Com.VibeCode.CourseRec.exe` 曾由執行中的程式鎖定，先以 `-p:BaseOutputPath` 輸出至暫存目錄完成建置；程式關閉後已回到一般輸出位置重新建置成功。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：63/63 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：無格式差異（僅出現工作區載入警告）。
+
+### 待辦
+- 尚未人工檢視飛出式色塊面板在淺色／深色下的外觀、選取狀態與 10 種主題實際套用效果。
+
+---
+
+## 2026-11-14 - v1.4.1
+
+### 目標
+將主題顏色下拉選單改為色塊選單，選項不顯示顏色名稱。
+
+### 變更
+- `Models/ColorThemeOption.cs`：新增主題顏色選項，包含選單顯示文字、主題背景色與強調色。
+- `ViewModels/SettingsViewModel.cs`：主題顏色選項改為 `ColorThemeOption`，並提供 10 組色塊配色。
+- `Views/SettingsPage.xaml`：`CmbColorTheme` 加入 `ItemTemplate`，以背景色到強調色的漸層色塊呈現；名稱僅保留於 `AutomationProperties.Name` 供螢幕閱讀器使用。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.4.1（`AssemblyVersion` 維持 1.4.0.0）。
+
+### 問題與解法
+- 驗證建置時 `Com.VibeCode.CourseRec.exe` 正由執行中的程式鎖定，先改用 `-p:BaseOutputPath` 輸出至暫存目錄完成建置；程式關閉後已回到一般輸出位置重新建置成功。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：62/62 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：無格式差異（僅出現工作區載入警告）。
+
+### 待辦
+- 尚未人工檢視色塊選單在淺色／深色下的外觀與選取狀態。
+
+---
+
+## 2026-11-14 - v1.4.0
+
+### 目標
+擴充主題顏色選項，新增 5 種配色。
+
+### 變更
+- `Styles/Themes/`：新增 `RoseTheme.xaml`、`MintTheme.xaml`、`GraphiteTheme.xaml`、`CocoaTheme.xaml`、`SkyTheme.xaml`，皆含淺色、深色與 Default 色階。
+- `Models/AppColorTheme.cs`：新增 `Rose`、`Mint`、`Graphite`、`Cocoa`、`Sky`。
+- `Services/Settings/ThemeService.cs`：註冊 5 組新主題資源字典。
+- `ViewModels/SettingsViewModel.cs`：設定頁主題顏色清單新增 5 個選項。
+- `Strings/zh-Hant/Resources.resw`：新增主題名稱並更新主題選單的無障礙說明。
+- `README.md`、`CHANGELOG.md`、`Directory.Build.props`：更新主題數量與版本至 1.4.0（`AssemblyVersion` 1.4.0.0）。
+
+### 問題與解法
+- 無。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：62/62 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：無格式差異（僅出現工作區載入警告）。
+
+### 待辦
+- 尚未人工檢視 10 種主題在淺色／深色下的實際對比度與迷你控制列外觀。
+
+---
+
+## 2026-11-14 - v1.3.8
+
+### 目標
+停止錄影回到待命狀態時，迷你控制列顯示的錄影時間要歸零。
+
+### 變更
+- `ViewModels/RecorderViewModel.cs`：`OnStateChanged` 進入 `RecordingState.Idle` 時同步將 `ElapsedTimeText` 設回 `00:00:00`。
+- 更新版本至 1.3.8（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- 停止錄影的 `finally` 只重設時間軸並切回待命，未同步更新顯示文字，因此迷你控制列保留最後一次的錄影時間。改在狀態切換集中處理，停止錄影、取消倒數與啟動失敗等回到待命的路徑都會歸零。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：62/62 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證停止錄影後迷你控制列顯示 `00:00:00`。
+
+---
+
+## 2026-11-14 - v1.3.7
+
+### 目標
+開啟迷你控制列後讓焦點保留在迷你控制列，方便直接操作列上按鈕。
+
+### 變更
+- `Services/MiniOverlayService.cs`：移除 `Show()` 啟用迷你控制列後把焦點交還主視窗的 `BringToFront()`，改為由迷你控制列取得焦點。
+- 更新版本至 1.3.7（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- v1.3.5 為避免主視窗失去焦點造成視覺變化，曾在顯示後把焦點交還主視窗；此行為會讓使用者開啟控制列後仍需再點一下才能操作。閃爍已於 v1.3.6 從顯示前預先設定大小與位置解決，因此可安全移除焦點歸還邏輯。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：62/62 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證開啟迷你控制列後焦點確實在控制列，且主視窗不再閃爍。
+
+---
+
+## 2026-11-14 - v1.3.6
+
+### 目標
+修正迷你控制列開啟時先以預設大尺寸顯示、再縮小並移動所造成的畫面閃爍。
+
+### 變更
+- `Models/MiniOverlayPosition.cs`：新增 `WidthDip`、`HeightDip`（預設 0），以 DIP 記錄控制列大小。
+- `Services/Settings/SettingsService.cs`：新增 `NormalizeMiniOverlayPosition`，將寬高夾限在合理範圍，舊設定缺少寬高時維持 0。
+- `Interop/WindowNativeMethods.cs`：新增 `GetDpiForWindow` P/Invoke，用於顯示前取得目標螢幕縮放比例。
+- `Views/MiniOverlayWindow.xaml.cs`：新增 `PrepareInitialBounds`，在 `Activate` 前先移到上次位置、依 DPI 換算上次 DIP 大小（或預先量測／預設值）並 `ResizeClient`，再夾回可見工作區；`RootBorder` 在 `Loaded` 完成尺寸與位置校正前保持 `Opacity=0`，完成後才顯示。
+- `Views/MiniOverlayWindow.xaml.cs`：`PersistPositionAsync` 一併儲存 `ClientSize` 換算後的 DIP 寬高；拖曳與關閉時都會保存。
+- `tests/CourseRec.Tests/SettingsServiceTests.cs`：新增 DIP 寬高儲存與讀取的 round-trip 測試。
+- 更新版本至 1.3.6（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- v1.3.5 只把焦點交還主視窗，未處理迷你控制列第一幀的尺寸。WinUI 視窗在 `Activate` 前若未設定大小，會先以預設較大尺寸呈現，直到 `Loaded` 才 `ResizeClient` 成內容大小，因此仍會看到「大變小」的閃爍。
+- 改為在視窗建構子就先 `Move` 與 `ResizeClient`，並以儲存的 DIP 大小或預先量測結果決定尺寸；即使量測失敗改用預設值，`Loaded` 前的內容也維持透明，不會讓使用者看到中間尺寸。
+- 大小以 DIP 儲存而非實體像素，避免 DPI 不同的螢幕還原時尺寸不一致。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：62/62 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證連續切換迷你控制列不再由大變小、舊版 `settings.json` 相容性，以及 100%／150% DPI 下的顯示大小。
+
+---
+
+## 2026-11-14 - v1.3.5
+
+### 目標
+修正從錄影工作台開啟迷你控制列時主視窗閃爍；取消程式啟動時自動顯示迷你控制列，但保留關閉程式時自動關閉；移除迷你控制列的「開啟主視窗」按鈕。
+
+### 變更
+- `Services/MiniOverlayService.cs`：`Show()` 啟用迷你控制列後，於同一個 UI 回合呼叫主視窗 `BringToFront()`，把焦點交還主視窗。
+- `App.xaml.cs`：`OnLaunched` 不再自動顯示迷你控制列，也不再於顯示後重新啟用主視窗；`OnMainWindowClosed` 仍會關閉迷你控制列。
+- `Views/MiniOverlayWindow.xaml`、`Views/MiniOverlayWindow.xaml.cs`：移除「開啟主視窗」按鈕與 `OnExpandMainWindowClicked` 事件處理。
+- `Strings/zh-Hant/Resources.resw`：移除 `MiniBtnExpand` 的自動化名稱與工具提示文字。
+- `README.md`、`docs/ARCHITECTURE.md`、`docs/DESIGN.md`、`docs/USER_GUIDE.md`：同步迷你控制列開啟方式與按鈕配置。
+- 更新版本至 1.3.5（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- 迷你控制列呼叫 `Activate()` 時會讓主視窗短暫失焦，WinUI 因而重繪非作用中的標題列與背景，形成肉眼可見的閃爍。改為在啟用迷你控制列的同一個 UI 執行緒回合內立刻把焦點交還主視窗，合成器只呈現最終狀態，避免中間的非作用中畫面。
+- 先前嘗試在新視窗顯示前後調整尺寸與位置，無法解決主視窗失焦造成的閃爍，因此改從焦點切換著手。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：61/61 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證開啟迷你控制列時主視窗不再閃爍、焦點確實留在主視窗，以及關閉程式時迷你控制列會一起關閉。
+
+---
+
+## 2026-11-14 - v1.3.4
+
+### 目標
+修正從錄影檔案庫點「快剪與複習」時，編輯器已有影片卻不會切換到快剪頁的問題；補上覆蓋提示，並調整剪除、快拍與匯出相關文字與按鈕位置。
+
+### 變更
+- `Views/MainWindow.xaml.cs`：改為直接訂閱 `INavigationCoordinator.NavigationRequested`，每次導覽請求都切換頁面；手動切頁時同步 `MainViewModel.CurrentPage`。
+- `Views/LibraryPage.xaml.cs`、`ViewModels/LibraryViewModel.cs`：在檔案庫開啟快剪前，若編輯器已有影片，先顯示取代確認對話框，確認後才導覽。
+- `ViewModels/EditorViewModel.cs`：`LoadVideoAsync` 新增 `replacementConfirmed` 參數避免重複提示；「顯示匯出檔案」改為開啟匯出資料夾命令。
+- `Views/EditorPage.xaml.cs`：頁面載入時若影片仍在載入中，不再重複嘗試還原上次影片。
+- `Views/EditorPage.xaml`：將「開啟剛完成的匯出影片」與「開啟匯出目錄」移到匯出按鈕列；匯出目錄改為圖示按鈕且不需先匯出。
+- `Strings/zh-Hant/Resources.resw`：調整「標記剪除終點」、「擷取當前畫面為PNG」、「開啟剛完成的匯出影片」、「匯出M4A純音訊」、「開啟匯出目錄」等文案，新增取代影片對話框與匯出資料夾錯誤字串。
+- `tests/CourseRec.Tests/EditorAndLibraryTests.cs`：新增已確認取代時不再重複提示的測試。
+- 版本更新至 1.3.4（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- 原導覽只在 `MainViewModel.CurrentPage` 屬性變更時觸發；使用者手動切到檔案庫不會更新 `CurrentPage`，導致再次從檔案庫開啟快剪時屬性值相同而沒有導覽。改由 `MainWindow` 直接訂閱導覽協調器事件後，即使目標頁面與目前值相同也會切換。
+- 檔案庫與編輯器各自可能顯示未儲存變更提示；由檔案庫統一先顯示覆蓋提示，並在協調器載入路徑標記已確認，避免連續跳出兩個對話框。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：61/61 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證最小視窗寬度下匯出按鈕列是否會過於擁擠。
+- 尚未人工驗證檔案庫覆蓋提示取消後仍留在檔案庫，以及確認後只出現一次提示。
+
+---
+
+## 2026-11-14 - v1.3.3
+
+### 目標
+修正迷你控制列剛啟動時內容空白，需滑鼠點擊後才顯示「待命中」、錄影時間與音量資料的問題。
+
+### 變更
+- `Services/MiniOverlayService.cs`：顯示迷你控制列改回呼叫 `Window.Activate()`，確保 XAML 內容與 `Loaded` 事件立即完成。
+- `App.xaml.cs`：自動顯示迷你控制列後再呼叫 `_mainWindow.Activate()`，將焦點還給主視窗。
+- 版本更新至 1.3.3（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- 前一版使用 `AppWindow.Show(activateWindow: false)` 只顯示視窗而未啟用；WinUI 3 在首次啟用前不會完成內容繪製與尺寸量測，因此狀態文字要等到點擊視窗後才出現。改回 `Activate()` 後內容會立即顯示，再由 `App` 將焦點交還主視窗。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：60/60 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證啟動後迷你控制列立即顯示「待命中」與 `00:00:00`，以及焦點是否留在主視窗。
+
+---
+
+## 2026-11-14 - v1.3.2
+
+### 目標
+將「迷你懸浮控制列」更名為「迷你控制列」，讓迷你控制列隨應用程式啟動自動顯示、關閉應用程式時自動關閉，停止錄影後保持顯示，並縮小按鈕與整體所占面積。
+
+### 變更
+- `Strings/zh-Hant/Resources.resw`：所有介面文字、標題、自動化名稱與設定說明改為「迷你控制列」。
+- `Services/IMiniOverlayService.cs`、`Services/MiniOverlayService.cs`：新增迷你控制列生命週期服務，集中處理顯示、切換、關閉、主題註冊與排除擷取設定同步。
+- `App.xaml.cs`：註冊 `IMiniOverlayService`；`OnLaunched` 自動顯示迷你控制列；`OnMainWindowClosed` 先關閉迷你控制列再停止 Host。
+- `Views/RecorderPage.xaml.cs`：移除頁面自行建立與關閉迷你列的邏輯，切換改呼叫 `IMiniOverlayService.Toggle()`。
+- `ViewModels/RecorderViewModel.cs`：移除 `CloseMiniOverlayRequested` 事件與停止錄影後自動關閉迷你列的觸發。
+- `Views/MiniOverlayWindow.xaml`、`Styles/SharedStyles.xaml`：縮小外框內距、按鈕尺寸與間距、指示燈、進度環與音量條，新增 `MiniOverlayIconButtonStyle`。
+- `README.md`、`docs/USER_GUIDE.md`、`docs/DESIGN.md`、`docs/ARCHITECTURE.md`、`docs/IMPLEMENTATION_PLAN.md`、`AGENTS.md`：同步新名稱與生命週期說明。
+- 版本更新至 1.3.2（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- 原本迷你控制列由 `RecorderPage` 建立，若啟動頁面不是錄影工作台就不會出現，且無法隨主視窗關閉；改由 Singleton 服務持有，讓它與應用程式同生命週期。
+- 迷你控制列改為常駐後，若在設定頁切換「排除擷取」，原本只在建立時套用會失效；改訂閱 `SettingsChanged` 即時呼叫 `SetExcludeFromCapture`。
+- WinUI 3 的 `Window` 沒有 `Resources` 屬性，按鈕樣式改放在 `Styles/SharedStyles.xaml`。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：60/60 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+
+### 待辦
+- 尚未人工驗證啟動自動顯示、關閉應用程式自動關閉，以及 100%／125%／150%／200% DPI 下縮小後的迷你控制列外觀與拖曳。
+
+---
+
+## 2026-11-14 - v1.3.1
+
+### 目標
+縮短從雙擊到主視窗首次顯示的時間；將即時預覽與音量監控延後到第一幀後啟動，並加入啟動耗時日誌以供後續比較。依使用者決定不啟用 ReadyToRun，只調整程式流程。
+
+### 變更
+- `Helpers/StartupTrace.cs`：新增啟動階段耗時量測，透過現有 `ILogger<App>` 寫入 `courserec.log`。
+- `Program.cs`、`App.xaml.cs`：標記進入點、App 建構、Host 建置／啟動、設定載入、視窗建構／Activate、閒置服務啟動等節點。
+- `App.xaml.cs`：改用精簡 `HostBuilder`（僅保留 ContentRoot、`appsettings.json` 與檔案日誌），移除 `CreateDefaultBuilder` 的環境變數／命令列等額外設定來源。
+- `App.OnLaunched` 重排：先建主視窗並 `Activate()`，再進行 `SettingsViewModel`、剪貼簿、工作列指示、全域快捷鍵與初始頁面導覽；移除啟動時預先解析 `SettingsViewModel`。
+- `MainWindow`：建構子不再同步導覽頁面；新增 `NavigateToInitialPage`，以 `DispatcherQueuePriority.Low` 在第一幀後導覽，`ContentFrame` 先顯示 `ProgressRing` 佔位。
+- `Services/Encoding/Mp4EncoderService.cs`：`MFStartup` 由建構子改為第一次 `Open()` 時延遲初始化（加鎖、僅嘗試一次），`Dispose` 僅在已初始化時 `MFShutdown`。
+- `Helpers/LocalizationService.cs`：`ResourceLoader` 與 `.resw` 後備字典改為 `Lazy`，首次解析失敗時才載入。
+- `ViewModels/RecorderViewModel.cs`：拆分 `AttachDispatcher` 與 `StartIdleServices`；來源枚舉、磁碟摘要與家務計時器延後啟動；`ResumeIdleCapture` 會確保閒置服務已啟動；暫停閒置擷取時不再因選取來源而重啟音訊監控。
+- `Views/RecorderPage.xaml.cs`：頁面載入後以低優先權延後啟動 D3D11／WGC 預覽與 WASAPI 監控。
+- `Services/Settings/ThemeService.cs`：新視窗首次套用主題時跳過「反向主題再切回」的強制刷新。
+- 版本更新至 1.3.1（`AssemblyVersion` 維持 1.3.0.0）。
+
+### 問題與解法
+- 原本 `RecorderPage` 在 `MainWindow` 建構子內同步導覽，頁面 XAML 與 `MFStartup` 都在視窗可見前完成；改為 Activate 後低優先權導覽並延後 MF 初始化。
+- `StartIdleServices` 觸發的來源枚舉完成後會選取第一個來源，原本會立刻啟動預覽與音訊；加上 `_isIdleCaptureSuspended` 判斷，避免非錄影頁或暫停狀態下重啟監控。
+- `DispatcherQueuePriority` 在 `RecorderPage` 同時存在 `Microsoft.UI.Dispatching` 與 `Windows.System` 兩個命名空間，改用完整名稱避免模稜兩可。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：60/60 通過。
+- `dotnet format CourseRec.sln --verify-no-changes --no-restore`：通過。
+- 啟動耗時（Debug x64，暖啟動、上次頁面為錄影工作台，單位 ms）：
+
+| 節點 | 優化前 | 優化後 |
+| --- | --- | --- |
+| App XAML 資源載入完成 | 123 | 117 |
+| 主機建置完成 | 244 | 231 |
+| 設定載入完成 | 454 | 506 |
+| 主視窗建構完成 | 756 | 717 |
+| 視窗 Activate | 777 | 733 |
+| 啟動後初始化完成 | 781 | 745 |
+
+- 優化後錄影頁 XAML 建構與 D3D11／WGC／WASAPI 啟動移到 `Activate` 之後，不再計入上表；實機冷啟動首跑因 JIT 與防毒掃描變異較大，未列入比較。
+
+### 待辦／已知限制
+- 尚未人工驗證各起始頁面（檔案庫、快剪、設定、關於）切換與全域快捷鍵在延後初始化下的行為。
+- 尚未量測 Release 發行版（本次未啟用 ReadyToRun）。
+- 若頁面 XAML 仍為主要成本，後續可將錄影頁右欄書籤清單改為 `x:Load` 延後載入。
+
 ## 2026-11-13 - v1.3.0
 
 ### 目標
