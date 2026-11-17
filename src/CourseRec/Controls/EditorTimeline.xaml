@@ -1,0 +1,85 @@
+<UserControl
+    x:Class="Com.VibeCode.CourseRec.Controls.EditorTimeline"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid RowSpacing="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 剪輯標記軌道：點擊或拖曳可跳轉播放位置 -->
+        <Grid x:Name="TrackHost" Grid.Row="0" Background="Transparent" MinWidth="120">
+            <Border
+                x:Name="TrackBackground"
+                Background="{ThemeResource CardSubtleSurfaceBrush}"
+                BorderBrush="{ThemeResource CardStrokeBrush}"
+                BorderThickness="1"
+                CornerRadius="4" />
+
+            <Canvas x:Name="TimelineCanvas">
+                <Border
+                    x:Name="KeptRangeBar"
+                    Height="10"
+                    Opacity="0.35"
+                    Background="{ThemeResource MeterSafeBrush}"
+                    CornerRadius="5"
+                    Canvas.Top="9"
+                    Visibility="Collapsed" />
+
+                <Canvas x:Name="MarkerLayer" />
+
+                <Border
+                    x:Name="Playhead"
+                    Width="2"
+                    Height="28"
+                    Background="{ThemeResource BrandAccentBrush}"
+                    Canvas.Top="0"
+                    Visibility="Collapsed" />
+
+                <Ellipse
+                    x:Name="PlayheadThumb"
+                    Width="10"
+                    Height="10"
+                    Fill="{ThemeResource BrandAccentBrush}"
+                    Canvas.Top="18"
+                    Visibility="Collapsed" />
+            </Canvas>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                x:Name="TrimStartText"
+                Grid.Column="0"
+                Style="{StaticResource CaptionSecondaryTextStyle}"
+                HorizontalAlignment="Left" />
+            <TextBlock
+                x:Name="PositionText"
+                Grid.Column="1"
+                Style="{StaticResource CaptionSecondaryTextStyle}"
+                HorizontalAlignment="Center" />
+            <TextBlock
+                x:Name="TotalDurationText"
+                Grid.Column="2"
+                Style="{StaticResource CaptionSecondaryTextStyle}"
+                HorizontalAlignment="Right" />
+        </Grid>
+
+        <!-- 隱藏的筆刷來源：讓動態建立的標記沿用目前主題色 -->
+        <Border x:Name="TrimBrushSource" Background="{ThemeResource MeterSafeBrush}" Visibility="Collapsed" />
+        <Border x:Name="CutBrushSource" Background="{ThemeResource RecordingActiveBrush}" Visibility="Collapsed" />
+        <Border x:Name="PendingBrushSource" Background="{ThemeResource RecordingPausedBrush}" Visibility="Collapsed" />
+        <Border x:Name="BookmarkBrushSource" Background="{ThemeResource BrandAccentBrush}" Visibility="Collapsed" />
+        <Border
+            x:Name="BookmarkOutlineBrushSource"
+            BorderBrush="{ThemeResource CardSurfaceBrush}"
+            BorderThickness="1"
+            Visibility="Collapsed" />
+    </Grid>
+</UserControl>

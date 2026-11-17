@@ -402,7 +402,7 @@
     <value>輸入章節或考點備註（留空則自動編號）</value>
   </data>
   <data name="BtnAddBookmark.Content" xml:space="preserve">
-    <value>打時間書籤</value>
+    <value>新增書籤</value>
   </data>
   <data name="BtnAddBookmark.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>在目前錄影時間點新增書籤</value>
@@ -484,7 +484,7 @@
     <value>暫停／繼續錄影</value>
   </data>
   <data name="MiniBtnBookmark.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>迷你控制列快速打時間書籤</value>
+    <value>迷你控制列快速新增書籤</value>
   </data>
   <data name="MiniBtnBookmark.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>快速打重點書籤</value>
@@ -634,6 +634,15 @@
   <data name="BtnEditorToggleFullScreen.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>將播放影片切換為全螢幕</value>
   </data>
+  <data name="BtnExitPlayerFullScreen.Content" xml:space="preserve">
+    <value>退出全螢幕</value>
+  </data>
+  <data name="BtnExitPlayerFullScreen.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>結束影片全螢幕播放並返回編輯器</value>
+  </data>
+  <data name="BtnExitPlayerFullScreen.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>退出全螢幕（Esc）</value>
+  </data>
   <data name="BtnEditorOpenSnapshotFolder.Content" xml:space="preserve">
     <value>開啟 PNG 資料夾</value>
   </data>
@@ -664,7 +673,40 @@
   </data>
 
   <data name="EditorSectionTrimCut.Text" xml:space="preserve">
-    <value>頭尾保留與中場休息剪除</value>
+    <value>頭尾保留與中場休息剪輯</value>
+  </data>
+  <data name="EditorTimeline.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>剪輯標記時間軸，點擊或拖曳可跳轉播放位置</value>
+  </data>
+  <data name="EditorTimelineLegendTrim.Text" xml:space="preserve">
+    <value>保留範圍</value>
+  </data>
+  <data name="EditorTimelineLegendCut.Text" xml:space="preserve">
+    <value>剪除片段</value>
+  </data>
+  <data name="EditorTimelineLegendPendingCut.Text" xml:space="preserve">
+    <value>待設定剪除點</value>
+  </data>
+  <data name="EditorTimelineLegendBookmark.Text" xml:space="preserve">
+    <value>書籤</value>
+  </data>
+  <data name="EditorTimelineSeekToolTipFormat" xml:space="preserve">
+    <value>跳轉至 {0}</value>
+  </data>
+  <data name="EditorTimelineTrimStartToolTipFormat" xml:space="preserve">
+    <value>保留起點 {0}</value>
+  </data>
+  <data name="EditorTimelineTrimEndToolTipFormat" xml:space="preserve">
+    <value>保留終點 {0}</value>
+  </data>
+  <data name="EditorTimelinePendingCutToolTipFormat" xml:space="preserve">
+    <value>待設定剪除結束點 {0}</value>
+  </data>
+  <data name="EditorTimelineBookmarkToolTipFormat" xml:space="preserve">
+    <value>書籤 {0}：{1}</value>
+  </data>
+  <data name="EditorTimelineCutSegmentToolTipFormat" xml:space="preserve">
+    <value>剪除 {0} ～ {1}</value>
   </data>
   <data name="BtnSetTrimStart.Content" xml:space="preserve">
     <value>設目前位置為起點</value>
@@ -679,13 +721,13 @@
     <value>將目前播放時間設為影片保留終點</value>
   </data>
   <data name="BtnMarkCutStart.Content" xml:space="preserve">
-    <value>標記剪除起點</value>
+    <value>標記剪輯起點</value>
   </data>
   <data name="BtnMarkCutStart.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>標記待刪除區間的起點</value>
   </data>
   <data name="BtnAddCutSegment.Content" xml:space="preserve">
-    <value>標記剪除終點</value>
+    <value>標記剪輯終點</value>
   </data>
   <data name="BtnAddCutSegment.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>將目前播放位置標記為剪除終點並加入待剪除區間清單</value>
@@ -706,13 +748,13 @@
     <value>調整匯出時的音量放大百分比</value>
   </data>
   <data name="BtnExportMp4.Content" xml:space="preserve">
-    <value>匯出 MP4 影片</value>
+    <value>另存剪輯 MP4 影片</value>
   </data>
   <data name="BtnExportMp4.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>匯出剪輯並校正書籤後的 MP4 課程影片</value>
   </data>
   <data name="BtnExportM4a.Content" xml:space="preserve">
-    <value>匯出 M4A 純音訊</value>
+    <value>另存剪輯 M4A 音訊</value>
   </data>
   <data name="BtnExportM4a.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>匯出輕量 M4A 音訊檔供 NotebookLM 或 Whisper 產生摘要</value>

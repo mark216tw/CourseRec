@@ -82,6 +82,7 @@
                             <TextBlock Text="{x:Bind ViewModel.LoadedVideoTitle, Mode=OneWay}" Style="{StaticResource SectionHeaderTextStyle}" />
 
                             <Border
+                                x:Name="PlayerHostBorder"
                                 Background="{ThemeResource PreviewBackdropBrush}"
                                 CornerRadius="{StaticResource SharedCornerRadius}"
                                 MinHeight="340">
@@ -91,6 +92,36 @@
                                     AutoPlay="False"
                                     Stretch="Uniform" />
                             </Border>
+
+                            <controls:EditorTimeline
+                                x:Name="EditorTimelineControl"
+                                x:Uid="EditorTimeline"
+                                IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}" />
+
+                            <Grid ColumnSpacing="16" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center" Fill="{ThemeResource MeterSafeBrush}" />
+                                    <TextBlock x:Uid="EditorTimelineLegendTrim" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center" Fill="{ThemeResource RecordingActiveBrush}" />
+                                    <TextBlock x:Uid="EditorTimelineLegendCut" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center" Fill="{ThemeResource RecordingPausedBrush}" />
+                                    <TextBlock x:Uid="EditorTimelineLegendPendingCut" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6">
+                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center" Fill="{ThemeResource BrandAccentBrush}" />
+                                    <TextBlock x:Uid="EditorTimelineLegendBookmark" Style="{StaticResource CaptionSecondaryTextStyle}" />
+                                </StackPanel>
+                            </Grid>
 
                             <Grid ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
@@ -111,6 +142,7 @@
                                     <Button
                                         x:Uid="BtnEditorToggleFullScreen"
                                         VerticalAlignment="Bottom"
+                                        IsEnabled="{x:Bind ViewModel.HasLoadedVideo, Mode=OneWay}"
                                         Click="OnToggleFullScreenClicked" />
                                     <Button
                                         x:Uid="BtnEditorCaptureFrame"
@@ -283,6 +315,21 @@
             </Grid>
         </StackPanel>
     </ScrollViewer>
+
+        <Grid
+            x:Name="PlayerFullScreenHost"
+            Visibility="Collapsed"
+            Background="{ThemeResource PreviewBackdropBrush}">
+            <Grid.KeyboardAccelerators>
+                <KeyboardAccelerator Key="Escape" Invoked="OnExitFullScreenInvoked" />
+            </Grid.KeyboardAccelerators>
+            <Button
+                x:Uid="BtnExitPlayerFullScreen"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="16"
+                Click="OnExitFullScreenClicked" />
+        </Grid>
 
         <controls:ToastPresenter
             x:Name="ToastPresenter"

@@ -8,9 +8,9 @@
     <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
-    <Version>1.5.3</Version>
+    <Version>1.5.5</Version>
     <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.3.0</FileVersion>
+    <FileVersion>1.5.5.0</FileVersion>
     <Company>VibeCode</Company>
     <Product>CourseRec</Product>
     <Copyright>Copyright © 2026 VibeCode. All rights reserved.</Copyright>

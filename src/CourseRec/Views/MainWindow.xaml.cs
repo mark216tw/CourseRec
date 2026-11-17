@@ -77,6 +77,14 @@ public sealed partial class MainWindow : Window
 
     public Func<Task>? BeforeForceStopRecordingAsync { get; set; }
 
+    /// <summary>
+    /// 切換側邊導覽列顯示狀態（播放器全螢幕時隱藏，離開時還原）。
+    /// </summary>
+    public void SetNavigationPaneVisible(bool isVisible)
+    {
+        MainNavView.IsPaneVisible = isVisible;
+    }
+
     public void BringToFront()
     {
         nint hwnd = WindowHandle;

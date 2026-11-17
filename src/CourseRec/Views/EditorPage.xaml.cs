@@ -4,10 +4,12 @@ using Com.VibeCode.CourseRec.Services.Settings;
 using Com.VibeCode.CourseRec.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Input;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using System.ComponentModel;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 using Windows.Storage;
@@ -30,6 +32,10 @@ public sealed partial class EditorPage : Page
     private TimeSpan _savedPosition;
     private TimeSpan? _restorePosition;
     private long _lastPositionSaveTicks;
+    private long _lastPlayheadUpdateTicks;
+    private bool _isTimelineSubscribed;
+    private bool _isPlayerFullScreen;
+    private bool _wasWindowMaximized;
 
     public EditorPage()
     {
@@ -48,6 +54,13 @@ public sealed partial class EditorPage : Page
 
     private void OnPageKeyDown(object sender, KeyRoutedEventArgs e)
     {
+        if (e.Key == VirtualKey.Escape && _isPlayerFullScreen)
+        {
+            ExitPlayerFullScreen();
+            e.Handled = true;
+            return;
+        }
+
         if (!ViewModel.CanInteract || CourseMediaPlayer.MediaPlayer is not { } player || IsEditableElementFocused())
         {
             return;
@@ -129,6 +142,7 @@ public sealed partial class EditorPage : Page
         ViewModel.PlaybackRateRequested += OnPlaybackRateRequested;
         ViewModel.SeekRequested += OnSeekRequested;
         ViewModel.ToastRequested += OnToastRequested;
+        SubscribeTimeline();
 
         if (!ViewModel.HasLoadedVideo)
         {
@@ -162,6 +176,8 @@ public sealed partial class EditorPage : Page
             {
                 player.PlaybackSession.Position = targetPos;
             }
+
+            RefreshTimeline();
         }
     }
 
@@ -176,9 +192,10 @@ public sealed partial class EditorPage : Page
         ViewModel.PlaybackRateRequested -= OnPlaybackRateRequested;
         ViewModel.SeekRequested -= OnSeekRequested;
         ViewModel.ToastRequested -= OnToastRequested;
+        UnsubscribeTimeline();
         ViewModel.CurrentPlaybackPositionProvider = null;
 
-        CourseMediaPlayer.IsFullWindow = false;
+        ExitPlayerFullScreen();
         DetachPlayerMediaSource();
     }
 
@@ -220,6 +237,8 @@ public sealed partial class EditorPage : Page
 
             player.PlaybackSession.Position = target;
         }
+
+        RefreshTimeline();
     }
 
     private void OnVideoSourceReleased(object? sender, EventArgs e)
@@ -279,6 +298,14 @@ public sealed partial class EditorPage : Page
     private void OnPlaybackPositionChanged(MediaPlaybackSession sender, object args)
     {
         long now = Environment.TickCount64;
+        TimeSpan position = sender.Position;
+        long lastPlayhead = Interlocked.Read(ref _lastPlayheadUpdateTicks);
+        if (now - lastPlayhead >= 50
+            && Interlocked.CompareExchange(ref _lastPlayheadUpdateTicks, now, lastPlayhead) == lastPlayhead)
+        {
+            DispatcherQueue.TryEnqueue(() => EditorTimelineControl.UpdatePlayhead(position));
+        }
+
         long lastSave = Interlocked.Read(ref _lastPositionSaveTicks);
         if (now - lastSave < 5000
             || Interlocked.CompareExchange(ref _lastPositionSaveTicks, now, lastSave) != lastSave)
@@ -325,12 +352,85 @@ public sealed partial class EditorPage : Page
         if (CourseMediaPlayer.MediaPlayer is { } player)
         {
             player.PlaybackSession.Position = targetPosition;
+            EditorTimelineControl.UpdatePlayhead(targetPosition);
         }
     }
 
     private TimeSpan GetPlayerPosition()
     {
         return CourseMediaPlayer.MediaPlayer?.PlaybackSession.Position ?? TimeSpan.Zero;
+    }
+
+    private void SubscribeTimeline()
+    {
+        if (_isTimelineSubscribed)
+        {
+            return;
+        }
+
+        _isTimelineSubscribed = true;
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        ViewModel.CutSegments.CollectionChanged += OnTimelineCollectionsChanged;
+        ViewModel.Bookmarks.CollectionChanged += OnTimelineCollectionsChanged;
+        EditorTimelineControl.SeekRequested += OnTimelineSeekRequested;
+
+        (string seek, string trimStart, string trimEnd, string pendingCut, string bookmark, string cutSegment) =
+            ViewModel.GetTimelineToolTipFormats();
+        EditorTimelineControl.ApplyToolTipFormats(seek, trimStart, trimEnd, pendingCut, bookmark, cutSegment);
+        RefreshTimeline();
+    }
+
+    private void UnsubscribeTimeline()
+    {
+        if (!_isTimelineSubscribed)
+        {
+            return;
+        }
+
+        _isTimelineSubscribed = false;
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        ViewModel.CutSegments.CollectionChanged -= OnTimelineCollectionsChanged;
+        ViewModel.Bookmarks.CollectionChanged -= OnTimelineCollectionsChanged;
+        EditorTimelineControl.SeekRequested -= OnTimelineSeekRequested;
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(EditorViewModel.TotalDuration):
+            case nameof(EditorViewModel.TrimStart):
+            case nameof(EditorViewModel.TrimEnd):
+            case nameof(EditorViewModel.PendingCutStart):
+            case nameof(EditorViewModel.HasLoadedVideo):
+                RefreshTimeline();
+                break;
+        }
+    }
+
+    private void OnTimelineCollectionsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        RefreshTimeline();
+    }
+
+    private void RefreshTimeline()
+    {
+        EditorTimelineControl.Update(
+            ViewModel.TotalDuration,
+            ViewModel.TrimStart,
+            ViewModel.TrimEnd,
+            ViewModel.PendingCutStart,
+            GetPlayerPosition(),
+            ViewModel.CutSegments,
+            ViewModel.Bookmarks);
+    }
+
+    private void OnTimelineSeekRequested(object? sender, TimeSpan targetPosition)
+    {
+        if (CourseMediaPlayer.MediaPlayer is { } player)
+        {
+            player.PlaybackSession.Position = targetPosition;
+        }
     }
 
     private void OnBookmarkItemClicked(object sender, ItemClickEventArgs e)
@@ -413,7 +513,77 @@ public sealed partial class EditorPage : Page
 
     private void OnToggleFullScreenClicked(object sender, RoutedEventArgs e)
     {
-        CourseMediaPlayer.IsFullWindow = !CourseMediaPlayer.IsFullWindow;
+        if (_isPlayerFullScreen)
+        {
+            ExitPlayerFullScreen();
+        }
+        else
+        {
+            EnterPlayerFullScreen();
+        }
+    }
+
+    private void OnExitFullScreenClicked(object sender, RoutedEventArgs e)
+    {
+        ExitPlayerFullScreen();
+    }
+
+    private void OnExitFullScreenInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        if (!_isPlayerFullScreen)
+        {
+            return;
+        }
+
+        ExitPlayerFullScreen();
+        args.Handled = true;
+    }
+
+    private void EnterPlayerFullScreen()
+    {
+        if (_isPlayerFullScreen
+            || CourseMediaPlayer.MediaPlayer is null
+            || Application.Current is not App { MainWindowInstance: MainWindow mainWindow })
+        {
+            return;
+        }
+
+        _wasWindowMaximized = mainWindow.AppWindow.Presenter is OverlappedPresenter presenter
+            && presenter.State == OverlappedPresenterState.Maximized;
+
+        PlayerHostBorder.Child = null;
+        PlayerFullScreenHost.Children.Insert(0, CourseMediaPlayer);
+        PlayerFullScreenHost.Visibility = Visibility.Visible;
+        mainWindow.SetNavigationPaneVisible(false);
+        mainWindow.AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+
+        _isPlayerFullScreen = true;
+        CourseMediaPlayer.Focus(FocusState.Programmatic);
+    }
+
+    private void ExitPlayerFullScreen()
+    {
+        if (!_isPlayerFullScreen)
+        {
+            return;
+        }
+
+        _isPlayerFullScreen = false;
+
+        PlayerFullScreenHost.Children.Remove(CourseMediaPlayer);
+        PlayerHostBorder.Child = CourseMediaPlayer;
+        PlayerFullScreenHost.Visibility = Visibility.Collapsed;
+
+        if (Application.Current is App { MainWindowInstance: MainWindow mainWindow })
+        {
+            mainWindow.AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+            if (_wasWindowMaximized && mainWindow.AppWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.Maximize();
+            }
+
+            mainWindow.SetNavigationPaneVisible(true);
+        }
     }
 
     private void OnToastRequested(object? sender, string message)

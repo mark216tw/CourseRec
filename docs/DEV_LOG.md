@@ -4,6 +4,58 @@
 
 ---
 
+## 2026-11-17 - v1.5.5
+
+### 目標
+修正快剪與複習編輯器「全螢幕」按鈕按下後沒有反應的問題。
+
+### 變更
+- `Views/EditorPage.xaml`：播放器外框命名為 `PlayerHostBorder`；新增全螢幕覆蓋層 `PlayerFullScreenHost`（含「退出全螢幕」按鈕與 `Esc` 鍵快速鍵）；「全螢幕」按鈕改為未載入影片時停用。
+- `Views/EditorPage.xaml.cs`：移除無效的 `MediaPlayerElement.IsFullWindow` 切換，改以 `AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen)` 進入視窗全螢幕，並將播放器移入覆蓋層；退出時歸位、還原最大化狀態與導覽列；`Esc` 與頁面卸載都會自動退出。
+- `Views/MainWindow.xaml.cs`：新增 `SetNavigationPaneVisible`，全螢幕時隱藏側邊導覽列。
+- `Strings/zh-Hant/Resources.resw`：新增退出全螢幕按鈕文字、無障礙名稱與工具提示。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`、`docs/BUILD.md`、`docs/USER_GUIDE.md`：版本更新至 1.5.5（`AssemblyVersion` 維持 1.5.0.0）。
+
+### 問題與解法
+- `MediaPlayerElement.IsFullWindow` 依賴 UWP 的 `CoreWindow`／`ApplicationView`，在 WinUI 3 桌面應用不支援且不會拋錯，因此按下按鈕完全沒有反應。
+- 改為調整 `AppWindow` 簡報器並把播放器移到頁面覆蓋層；因覆蓋層位於 `Frame` 內，另需隱藏 `NavigationView` 的側邊面板才能讓影片填滿整個視窗。
+- WinUI 3 的 `MediaTransportControls` 已無 `IsFullWindowButtonVisible`／`IsFullWindowEnabled`，無法直接隱藏內建全螢幕鈕，維持原樣。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+
+### 待辦
+- 尚未人工確認全螢幕切換時的畫面重整、退出後最大化還原，以及多螢幕環境下的顯示位置。
+
+---
+
+## 2026-11-17 - v1.5.4
+
+### 目標
+在快剪與複習編輯器的播放區塊加入可視化剪輯標記時間軸，讓使用者設定頭尾保留、剪除區間、待設定剪除點與書籤時，能直接在時間軸上看到對應位置並點擊／拖曳跳轉。
+
+### 變更
+- `Controls/EditorTimeline.xaml`、`Controls/EditorTimeline.xaml.cs`：新增剪輯標記時間軸控制項，繪製保留範圍、剪除片段、待設定剪除點、書籤與播放頭；支援點擊／拖曳跳轉、標記工具提示與主題筆刷。
+- `Views/EditorPage.xaml`：播放器下方加入時間軸與四項圖例（保留範圍、剪除片段、待設定剪除點、書籤）。
+- `Views/EditorPage.xaml.cs`：訂閱 ViewModel 屬性與集合變更以重繪標記；播放位置變更時以 50 ms 節流更新播放頭；時間軸跳轉直接設定播放器位置；視窗載入／卸載時正確訂閱與取消訂閱。
+- `ViewModels/EditorViewModel.cs`：公開唯讀 `PendingCutStart`，並在標記、加入片段、重設、載入與卸載時通知變更；新增 `GetTimelineToolTipFormats()` 取得本地化提示格式。
+- `Strings/zh-Hant/Resources.resw`：新增時間軸無障礙名稱、圖例與各標記工具提示格式字串。
+- `tests/CourseRec.Tests/EditorAndLibraryTests.cs`：補充 `PendingCutStart` 標記、加入片段與重設後狀態的斷言。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`、`docs/BUILD.md`、`docs/USER_GUIDE.md`：版本更新至 1.5.4（`AssemblyVersion` 維持 1.5.0.0），補上時間軸使用說明。
+
+### 問題與解法
+- 內建 `MediaTransportControls` 的進度列樣板不開放穩定插入標記，因此改在播放器下方自繪時間軸，不動內建播放控制。
+- 動態建立的標記無法直接使用 `ThemeResource`，改由隱藏的筆刷來源元素取得主題筆刷，並於 `ActualThemeChanged` 時重繪。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：63/63 通過。
+
+### 待辦
+- 尚未人工確認時間軸在淺色／深色主題、不同視窗寬度與觸控拖曳下的標記位置與操作手感。
+
+---
+
 ## 2026-11-14 - v1.5.3
 
 ### 目標

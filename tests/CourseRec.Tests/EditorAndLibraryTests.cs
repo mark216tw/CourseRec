@@ -70,8 +70,10 @@ public sealed class EditorAndLibraryTests : IDisposable
 
         fakePosition = TimeSpan.FromMinutes(20);
         editorVm.MarkCutStart();
+        Assert.Equal(TimeSpan.FromMinutes(20), editorVm.PendingCutStart);
         fakePosition = TimeSpan.FromMinutes(30);
         editorVm.AddCutSegment();
+        Assert.Null(editorVm.PendingCutStart);
 
         editorVm.AudioGainPercent = 150.0;
         Assert.Contains("150", editorVm.AudioGainText);
@@ -97,10 +99,12 @@ public sealed class EditorAndLibraryTests : IDisposable
         Assert.Equal(Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success, editorVm.BannerSeverity);
         fakePosition = TimeSpan.FromMinutes(12);
         editorVm.MarkCutStart();
+        Assert.Equal(TimeSpan.FromMinutes(12), editorVm.PendingCutStart);
         Assert.True(editorVm.HasEditsToReset);
         editorVm.ResetEditsConfirmed();
         Assert.Equal(TimeSpan.Zero, editorVm.TrimStart);
         Assert.Equal(TimeSpan.FromMinutes(60), editorVm.TrimEnd);
+        Assert.Null(editorVm.PendingCutStart);
         Assert.Empty(editorVm.CutSegments);
         Assert.False(editorVm.HasPendingCutStart);
         Assert.Equal(100.0, editorVm.AudioGainPercent);

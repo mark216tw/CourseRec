@@ -182,6 +182,8 @@ public sealed partial class EditorViewModel : ObservableObject
 
     public bool HasPendingCutStart => _pendingCutStart.HasValue;
 
+    public TimeSpan? PendingCutStart => _pendingCutStart;
+
     public Visibility CompletedExportVisibility => string.IsNullOrEmpty(CompletedExportPath) ? Visibility.Collapsed : Visibility.Visible;
     public bool HasEditsToReset => TrimStart != TimeSpan.Zero || TrimEnd != TotalDuration
         || CutSegments.Count > 0 || _pendingCutStart.HasValue || AudioGainPercent != 100.0;
@@ -191,6 +193,15 @@ public sealed partial class EditorViewModel : ObservableObject
         _localization.GetString("ResetEditsMessage"),
         _localization.GetString("ResetEditsConfirm"),
         _localization.GetString("DialogCancel"));
+
+    public (string Seek, string TrimStart, string TrimEnd, string PendingCut, string Bookmark, string CutSegment)
+        GetTimelineToolTipFormats() => (
+            _localization.GetString("EditorTimelineSeekToolTipFormat"),
+            _localization.GetString("EditorTimelineTrimStartToolTipFormat"),
+            _localization.GetString("EditorTimelineTrimEndToolTipFormat"),
+            _localization.GetString("EditorTimelinePendingCutToolTipFormat"),
+            _localization.GetString("EditorTimelineBookmarkToolTipFormat"),
+            _localization.GetString("EditorTimelineCutSegmentToolTipFormat"));
 
     public void ResetEditsConfirmed()
     {
@@ -204,6 +215,7 @@ public sealed partial class EditorViewModel : ObservableObject
         CutSegments.Clear();
         _pendingCutStart = null;
         OnPropertyChanged(nameof(HasPendingCutStart));
+        OnPropertyChanged(nameof(PendingCutStart));
         AudioGainPercent = 100.0;
         HasUnsavedChanges = false;
         UpdateTrimRangeSummary();
@@ -296,6 +308,7 @@ public sealed partial class EditorViewModel : ObservableObject
             TrimEnd = duration;
             _pendingCutStart = null;
             OnPropertyChanged(nameof(HasPendingCutStart));
+            OnPropertyChanged(nameof(PendingCutStart));
 
             CutSegments.Clear();
             Bookmarks.Clear();
@@ -561,6 +574,7 @@ public sealed partial class EditorViewModel : ObservableObject
 
         _pendingCutStart = GetCurrentPosition();
         OnPropertyChanged(nameof(HasPendingCutStart));
+        OnPropertyChanged(nameof(PendingCutStart));
     }
 
     [RelayCommand]
@@ -578,6 +592,7 @@ public sealed partial class EditorViewModel : ObservableObject
 
         _pendingCutStart = null;
         OnPropertyChanged(nameof(HasPendingCutStart));
+        OnPropertyChanged(nameof(PendingCutStart));
 
         if (end - start < TimeSpan.FromMilliseconds(250))
         {
@@ -798,6 +813,7 @@ public sealed partial class EditorViewModel : ObservableObject
         TrimEnd = TimeSpan.Zero;
         _pendingCutStart = null;
         OnPropertyChanged(nameof(HasPendingCutStart));
+        OnPropertyChanged(nameof(PendingCutStart));
         CutSegments.Clear();
         Bookmarks.Clear();
         OnPropertyChanged(nameof(BookmarksEmptyVisibility));

@@ -1,3 +1,53 @@
+# CourseRec v1.5.5 版本說明
+
+本次更新修正快剪與複習編輯器的全螢幕按鈕。
+
+## 下載
+
+- `CourseRec-1.5.5-win-x64-framework-dependent.zip`
+- `CourseRec-1.5.5-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **全螢幕真的生效了**：在快剪與複習編輯器按下「全螢幕」，影片會獨占整個螢幕，並隱藏側邊導覽列。
+- **簡單退出**：按右上角「退出全螢幕」或 `Esc` 鍵即可返回編輯器，原本最大化的視窗也會還原。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
+# CourseRec v1.5.4 版本說明
+
+本次更新在快剪與複習編輯器加入可視化剪輯標記時間軸。
+
+## 下載
+
+- `CourseRec-1.5.4-win-x64-framework-dependent.zip`
+- `CourseRec-1.5.4-win-arm64-framework-dependent.zip`
+
+> 本版本**不提供安裝程式**。請解壓縮後執行 `Com.VibeCode.CourseRec.exe`，並先安裝 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) 對應架構版本。Windows App SDK 已隨附，無需另裝。
+
+## 本次更新亮點
+
+- **剪輯標記時間軸**：播放器下方新增時間軸，一眼看見保留範圍、剪除片段、待設定剪除點與書籤。
+- **點擊即可跳轉**：在時間軸上點擊或拖曳，即可跳到對應的播放位置。
+
+## 系統需求
+
+- Windows 10 1809（Build 17763）以上。
+- x64 或 ARM64 架構，請下載對應壓縮檔。
+- .NET 10 Desktop Runtime（非 Self-Contained 版本必要）。
+- 「只錄單一視窗聲音」需 Windows 10 Build 20348 或 Windows 11 以上；舊版會自動降級為系統全體聲音。
+
+---
+
 # CourseRec v1.5.3 版本說明
 
 本次更新統一主題顏色色塊大小。
