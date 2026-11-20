@@ -5,8 +5,9 @@ namespace Com.VibeCode.CourseRec.Services.Audio;
 /// </summary>
 public sealed class AudioRingBuffer
 {
-    private readonly float[] _buffer;
+    private readonly int _capacity;
     private readonly object _sync = new();
+    private float[]? _buffer;
     private int _readIndex;
     private int _writeIndex;
     private int _count;
@@ -14,10 +15,10 @@ public sealed class AudioRingBuffer
     public AudioRingBuffer(int capacitySamples)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(capacitySamples, 0);
-        _buffer = new float[capacitySamples];
+        _capacity = capacitySamples;
     }
 
-    public int Capacity => _buffer.Length;
+    public int Capacity => _capacity;
 
     public int AvailableSamples
     {
@@ -42,34 +43,36 @@ public sealed class AudioRingBuffer
 
         lock (_sync)
         {
-            if (source.Length >= _buffer.Length)
+            float[] buffer = _buffer ??= new float[_capacity];
+
+            if (source.Length >= buffer.Length)
             {
-                ReadOnlySpan<float> tail = source.Slice(source.Length - _buffer.Length);
-                tail.CopyTo(_buffer);
+                ReadOnlySpan<float> tail = source.Slice(source.Length - buffer.Length);
+                tail.CopyTo(buffer);
                 _readIndex = 0;
                 _writeIndex = 0;
-                _count = _buffer.Length;
-                return _buffer.Length;
+                _count = buffer.Length;
+                return buffer.Length;
             }
 
-            int free = _buffer.Length - _count;
+            int free = buffer.Length - _count;
             if (source.Length > free)
             {
                 int drop = source.Length - free;
-                _readIndex = (_readIndex + drop) % _buffer.Length;
+                _readIndex = (_readIndex + drop) % buffer.Length;
                 _count -= drop;
             }
 
-            int firstChunk = Math.Min(source.Length, _buffer.Length - _writeIndex);
-            source.Slice(0, firstChunk).CopyTo(_buffer.AsSpan(_writeIndex, firstChunk));
+            int firstChunk = Math.Min(source.Length, buffer.Length - _writeIndex);
+            source.Slice(0, firstChunk).CopyTo(buffer.AsSpan(_writeIndex, firstChunk));
 
             int remaining = source.Length - firstChunk;
             if (remaining > 0)
             {
-                source.Slice(firstChunk, remaining).CopyTo(_buffer.AsSpan(0, remaining));
+                source.Slice(firstChunk, remaining).CopyTo(buffer.AsSpan(0, remaining));
             }
 
-            _writeIndex = (_writeIndex + source.Length) % _buffer.Length;
+            _writeIndex = (_writeIndex + source.Length) % buffer.Length;
             _count += source.Length;
             return source.Length;
         }
@@ -87,19 +90,20 @@ public sealed class AudioRingBuffer
 
         lock (_sync)
         {
-            int toRead = Math.Min(destination.Length, _count);
-            if (toRead > 0)
+            float[]? buffer = _buffer;
+            int toRead = buffer is null ? 0 : Math.Min(destination.Length, _count);
+            if (toRead > 0 && buffer is not null)
             {
-                int firstChunk = Math.Min(toRead, _buffer.Length - _readIndex);
-                _buffer.AsSpan(_readIndex, firstChunk).CopyTo(destination.Slice(0, firstChunk));
+                int firstChunk = Math.Min(toRead, buffer.Length - _readIndex);
+                buffer.AsSpan(_readIndex, firstChunk).CopyTo(destination.Slice(0, firstChunk));
 
                 int remaining = toRead - firstChunk;
                 if (remaining > 0)
                 {
-                    _buffer.AsSpan(0, remaining).CopyTo(destination.Slice(firstChunk, remaining));
+                    buffer.AsSpan(0, remaining).CopyTo(destination.Slice(firstChunk, remaining));
                 }
 
-                _readIndex = (_readIndex + toRead) % _buffer.Length;
+                _readIndex = (_readIndex + toRead) % buffer.Length;
                 _count -= toRead;
             }
 
@@ -119,7 +123,24 @@ public sealed class AudioRingBuffer
             _readIndex = 0;
             _writeIndex = 0;
             _count = 0;
-            Array.Clear(_buffer);
+            if (_buffer is not null)
+            {
+                Array.Clear(_buffer);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 釋放底層大型樣本緩衝區，讓待機常駐期間不佔用 LOH 記憶體。
+    /// </summary>
+    public void ReleaseBuffer()
+    {
+        lock (_sync)
+        {
+            _readIndex = 0;
+            _writeIndex = 0;
+            _count = 0;
+            _buffer = null;
         }
     }
 }

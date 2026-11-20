@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Com.VibeCode.CourseRec.Helpers;
 using Com.VibeCode.CourseRec.Models;
 using Microsoft.Extensions.Logging;
@@ -12,13 +11,6 @@ namespace Com.VibeCode.CourseRec.Services.Settings;
 /// </summary>
 public sealed class SettingsService : ISettingsService
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     private static readonly int[] SupportedCountdownSeconds = [0, 3, 5, 10, 15, 20, 25, 30];
 
     private readonly string _settingsFilePath;
@@ -65,7 +57,7 @@ public sealed class SettingsService : ISettingsService
             }
 
             string json = await File.ReadAllTextAsync(_settingsFilePath, cancellationToken).ConfigureAwait(false);
-            AppSettings? loaded = JsonSerializer.Deserialize<AppSettings>(json, SerializerOptions);
+            AppSettings? loaded = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.AppSettings);
             Current = Normalize(loaded ?? CreateDefaultSettings(_defaults), _defaults);
             return Current;
         }
@@ -222,7 +214,7 @@ public sealed class SettingsService : ISettingsService
         }
 
         string tempPath = _settingsFilePath + ".tmp";
-        string json = JsonSerializer.Serialize(settings, SerializerOptions);
+        string json = JsonSerializer.Serialize(settings, AppJsonSerializerContext.Default.AppSettings);
         await File.WriteAllTextAsync(tempPath, json, cancellationToken).ConfigureAwait(false);
         File.Move(tempPath, _settingsFilePath, overwrite: true);
     }

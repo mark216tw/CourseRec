@@ -511,6 +511,17 @@
     <value>錄影中</value>
   </data>
 
+  <!-- CountdownOverlayWindow -->
+  <data name="CountdownOverlayTitle" xml:space="preserve">
+    <value>CourseRec 錄影倒數</value>
+  </data>
+  <data name="CountdownOverlaySubtitle.Text" xml:space="preserve">
+    <value>即將開始錄影</value>
+  </data>
+  <data name="CountdownOverlayNumberAutomationFormat" xml:space="preserve">
+    <value>距離開始錄影還有 {0} 秒</value>
+  </data>
+
   <!-- LibraryPage -->
   <data name="LibraryPageTitle.Text" xml:space="preserve">
     <value>錄影檔案庫</value>

@@ -106,11 +106,6 @@ public sealed class Mp4EncoderService : IMp4EncoderService
 
             ActiveProfile = profile;
             OutputFilePath = outputFilePath;
-            int frameBytes = _configuredInputWidth * _configuredInputHeight * 4;
-            if (_scaledFrameBuffer.Length < frameBytes)
-            {
-                _scaledFrameBuffer = new byte[frameBytes];
-            }
         }
     }
 
@@ -207,6 +202,7 @@ public sealed class Mp4EncoderService : IMp4EncoderService
             {
                 MediaFoundationNativeMethods.ReleaseBufferPool(_videoBufferPool);
                 MediaFoundationNativeMethods.ReleaseBufferPool(_audioBufferPool);
+                _scaledFrameBuffer = [];
                 _configuredInputWidth = 0;
                 _configuredInputHeight = 0;
                 ActiveProfile = null;

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Com.VibeCode.CourseRec.Helpers;
 using Com.VibeCode.CourseRec.Models;
 using Microsoft.Extensions.Logging;
 
@@ -9,12 +10,6 @@ namespace Com.VibeCode.CourseRec.Services.Bookmarks;
 /// </summary>
 public sealed class BookmarkService : IBookmarkService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     private readonly ILogger<BookmarkService> _logger;
     private readonly SemaphoreSlim _writeLock = new(1, 1);
 
@@ -47,7 +42,7 @@ public sealed class BookmarkService : IBookmarkService
         try
         {
             string json = await File.ReadAllTextAsync(sidecarPath, cancellationToken).ConfigureAwait(false);
-            BookmarkDocument? doc = JsonSerializer.Deserialize<BookmarkDocument>(json, JsonOptions);
+            BookmarkDocument? doc = JsonSerializer.Deserialize(json, AppJsonSerializerContext.Default.BookmarkDocument);
             if (doc is null)
             {
                 return new BookmarkDocument { VideoFileName = Path.GetFileName(videoFilePath) };
@@ -96,7 +91,7 @@ public sealed class BookmarkService : IBookmarkService
         string tempPath = sidecarPath + ".tmp";
         try
         {
-            string json = JsonSerializer.Serialize(doc, JsonOptions);
+            string json = JsonSerializer.Serialize(doc, AppJsonSerializerContext.Default.BookmarkDocument);
             await File.WriteAllTextAsync(tempPath, json, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             File.Move(tempPath, sidecarPath, overwrite: true);

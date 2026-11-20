@@ -10,6 +10,12 @@ public static partial class WindowNativeMethods
     public const uint WdaNone = 0x00000000;
     public const uint WdaExcludeFromCapture = 0x00000011;
     public const int SwRestore = 9;
+    public const int GwlExStyle = -20;
+    public const long WsExTransparent = 0x00000020L;
+    public const long WsExToolWindow = 0x00000080L;
+    public const long WsExLayered = 0x00080000L;
+    public const long WsExNoActivate = 0x08000000L;
+    public const uint LwaAlpha = 0x00000002u;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Point
@@ -41,8 +47,37 @@ public static partial class WindowNativeMethods
     [LibraryImport("user32.dll")]
     public static partial uint GetDpiForWindow(nint hWnd);
 
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+    public static partial nint GetWindowLongPtr(nint hWnd, int nIndex);
+
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    public static partial nint SetWindowLongPtr(nint hWnd, int nIndex, nint dwNewLong);
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool SetLayeredWindowAttributes(nint hWnd, uint crKey, byte bAlpha, uint dwFlags);
+
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmSetWindowAttribute(nint hwnd, int attribute, ref int value, int size);
+
+    public static void TryConfigureNonActivatingClickThrough(nint hwnd, byte alpha)
+    {
+        if (hwnd == 0)
+        {
+            return;
+        }
+
+        nint currentStyle = GetWindowLongPtr(hwnd, GwlExStyle);
+        nint baseStyle = currentStyle | (nint)(WsExNoActivate | WsExToolWindow);
+        nint layeredStyle = baseStyle | (nint)(WsExLayered | WsExTransparent);
+
+        SetWindowLongPtr(hwnd, GwlExStyle, layeredStyle);
+        if (!SetLayeredWindowAttributes(hwnd, 0, alpha, LwaAlpha))
+        {
+            // 若無法套用分層透明度，回退為不搶焦點工具視窗，避免視窗因 alpha 為 0 而不可見。
+            SetWindowLongPtr(hwnd, GwlExStyle, baseStyle);
+        }
+    }
 
     public static void TrySetImmersiveDarkMode(nint hwnd, bool isDark)
     {

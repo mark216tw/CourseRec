@@ -42,6 +42,12 @@ public sealed partial class EditorPage : Page
         ViewModel = App.GetService<EditorViewModel>();
         _settingsService = App.GetService<ISettingsService>();
         _logger = App.GetService<ILogger<EditorPage>>();
+        if (ViewModel.ConfirmDiscardEditsAsync is null
+            && Application.Current is App { MainWindowInstance: MainWindow mainWindow })
+        {
+            ViewModel.ConfirmDiscardEditsAsync = mainWindow.ConfirmDiscardEditorChangesAsync;
+        }
+
         InitializeComponent();
         InfoBarAutoDismiss.Attach(StatusInfoBar);
         KeyDown += OnPageKeyDown;
@@ -196,7 +202,8 @@ public sealed partial class EditorPage : Page
         ViewModel.CurrentPlaybackPositionProvider = null;
 
         ExitPlayerFullScreen();
-        DetachPlayerMediaSource();
+        DetachPlayerMediaSource(disposePlayer: true);
+        MemoryTrimHelper.RequestTrim();
     }
 
     private async void OnOpenVideoFileClicked(object sender, RoutedEventArgs e)
@@ -272,9 +279,10 @@ public sealed partial class EditorPage : Page
         }
     }
 
-    private void DetachPlayerMediaSource()
+    private void DetachPlayerMediaSource(bool disposePlayer = false)
     {
-        if (CourseMediaPlayer.MediaPlayer is { } player)
+        MediaPlayer? player = CourseMediaPlayer.MediaPlayer;
+        if (player is not null)
         {
             player.PlaybackSession.NaturalDurationChanged -= OnNaturalDurationChanged;
             player.PlaybackSession.PositionChanged -= OnPlaybackPositionChanged;
@@ -284,6 +292,12 @@ public sealed partial class EditorPage : Page
         CourseMediaPlayer.Source = null;
         _currentMediaSource?.Dispose();
         _currentMediaSource = null;
+
+        if (disposePlayer && player is not null)
+        {
+            CourseMediaPlayer.SetMediaPlayer(null);
+            player.Dispose();
+        }
     }
 
     private void OnNaturalDurationChanged(MediaPlaybackSession sender, object args)

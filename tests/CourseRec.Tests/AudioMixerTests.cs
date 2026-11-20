@@ -146,4 +146,33 @@ public sealed class AudioMixerTests
         Assert.InRange(pcm16[0], expected - 2, expected + 2);
         Assert.InRange(pcm16[6399], expected - 2, expected + 2);
     }
+
+    [Fact]
+    public void AudioRingBuffer_ReleaseBuffer_ClearsAndReallocatesOnNextWrite()
+    {
+        var ring = new AudioRingBuffer(16);
+        Assert.Equal(16, ring.Capacity);
+        Assert.Equal(0, ring.AvailableSamples);
+
+        float[] emptyRead = [1f, 1f, 1f, 1f];
+        Assert.Equal(0, ring.ReadWithZeroFill(emptyRead));
+        Assert.All(emptyRead, sample => Assert.Equal(0f, sample));
+
+        ring.Write([0.25f, 0.5f, 0.75f]);
+        Assert.Equal(3, ring.AvailableSamples);
+
+        ring.ReleaseBuffer();
+        Assert.Equal(0, ring.AvailableSamples);
+
+        float[] afterRelease = [1f, 1f];
+        Assert.Equal(0, ring.ReadWithZeroFill(afterRelease));
+        Assert.All(afterRelease, sample => Assert.Equal(0f, sample));
+
+        ring.Write([0.8f, -0.8f]);
+        Assert.Equal(2, ring.AvailableSamples);
+        float[] reallocated = new float[2];
+        Assert.Equal(2, ring.ReadWithZeroFill(reallocated));
+        Assert.Equal(0.8f, reallocated[0], 4);
+        Assert.Equal(-0.8f, reallocated[1], 4);
+    }
 }

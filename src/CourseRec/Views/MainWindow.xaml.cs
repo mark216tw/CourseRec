@@ -24,25 +24,25 @@ public sealed partial class MainWindow : Window
     private const int MinimumWindowHeight = 680;
 
     private readonly MainViewModel _viewModel;
-    private readonly RecorderViewModel _recorderViewModel;
     private readonly INavigationCoordinator _navigationCoordinator;
     private readonly ISettingsService _settingsService;
     private readonly ILocalizationService _localization;
     private readonly ILogger<MainWindow> _logger;
+    private RecorderViewModel? _recorderViewModel;
     private bool _allowClose;
     private bool _isShowingCloseDialog;
+    private bool _isMinimized;
+    private bool _suspendedByMinimize;
     private RectInt32? _lastNormalBounds;
 
     public MainWindow(
         MainViewModel viewModel,
-        RecorderViewModel recorderViewModel,
         INavigationCoordinator navigationCoordinator,
         ISettingsService settingsService,
         ILocalizationService localization,
         ILogger<MainWindow> logger)
     {
         _viewModel = viewModel;
-        _recorderViewModel = recorderViewModel;
         _navigationCoordinator = navigationCoordinator;
         _settingsService = settingsService;
         _localization = localization;
@@ -56,9 +56,24 @@ public sealed partial class MainWindow : Window
         AppWindow.Closing += OnAppWindowClosing;
         AppWindow.Changed += OnAppWindowChanged;
         _navigationCoordinator.NavigationRequested += OnNavigationRequested;
-        _recorderViewModel.PropertyChanged += OnRecorderViewModelPropertyChanged;
         Closed += OnMainWindowClosed;
+    }
 
+    public void AttachRecorderViewModel(RecorderViewModel recorderViewModel)
+    {
+        ArgumentNullException.ThrowIfNull(recorderViewModel);
+        if (ReferenceEquals(_recorderViewModel, recorderViewModel))
+        {
+            return;
+        }
+
+        if (_recorderViewModel is not null)
+        {
+            _recorderViewModel.PropertyChanged -= OnRecorderViewModelPropertyChanged;
+        }
+
+        _recorderViewModel = recorderViewModel;
+        _recorderViewModel.PropertyChanged += OnRecorderViewModelPropertyChanged;
         UpdateWindowTitle();
     }
 
@@ -173,6 +188,16 @@ public sealed partial class MainWindow : Window
 
     private void OnAppWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
     {
+        if (sender.Presenter is OverlappedPresenter statePresenter)
+        {
+            bool isNowMinimized = statePresenter.State == OverlappedPresenterState.Minimized;
+            if (isNowMinimized != _isMinimized)
+            {
+                _isMinimized = isNowMinimized;
+                HandleMinimizedStateChanged(isNowMinimized);
+            }
+        }
+
         if (!args.DidPositionChange && !args.DidSizeChange)
         {
             return;
@@ -187,6 +212,41 @@ public sealed partial class MainWindow : Window
         PointInt32 position = sender.Position;
         SizeInt32 size = sender.Size;
         _lastNormalBounds = new RectInt32(position.X, position.Y, size.Width, size.Height);
+    }
+
+    private void HandleMinimizedStateChanged(bool isMinimized)
+    {
+        if (isMinimized)
+        {
+            if (!_viewModel.IsRecordingActive)
+            {
+                bool miniOverlayVisible = false;
+                try
+                {
+                    miniOverlayVisible = App.GetService<IMiniOverlayService>().IsVisible;
+                }
+                catch
+                {
+                    // 迷你控制列服務尚未就緒時視為未顯示。
+                }
+
+                if (!miniOverlayVisible && _recorderViewModel is not null)
+                {
+                    _recorderViewModel.SuspendIdleCapture();
+                    _suspendedByMinimize = true;
+                }
+
+                MemoryTrimHelper.RequestTrim(trimWorkingSet: true);
+            }
+        }
+        else if (_suspendedByMinimize)
+        {
+            _suspendedByMinimize = false;
+            if (_viewModel.CurrentPage == NavigationPageKey.Recorder)
+            {
+                _recorderViewModel?.ResumeIdleCapture();
+            }
+        }
     }
 
     private async Task SaveWindowPlacementAsync()
@@ -245,12 +305,15 @@ public sealed partial class MainWindow : Window
     private void OnMainWindowClosed(object sender, WindowEventArgs args)
     {
         _navigationCoordinator.NavigationRequested -= OnNavigationRequested;
-        _recorderViewModel.PropertyChanged -= OnRecorderViewModelPropertyChanged;
+        if (_recorderViewModel is not null)
+        {
+            _recorderViewModel.PropertyChanged -= OnRecorderViewModelPropertyChanged;
+        }
     }
 
     private void UpdateWindowTitle()
     {
-        if (_recorderViewModel.State == RecordingState.Idle)
+        if (_recorderViewModel is null || _recorderViewModel.State == RecordingState.Idle)
         {
             Title = _viewModel.WindowTitle;
             return;
@@ -309,6 +372,10 @@ public sealed partial class MainWindow : Window
         if (ContentFrame.CurrentSourcePageType != targetPageType)
         {
             ContentFrame.Navigate(targetPageType);
+            if (ContentFrame.BackStackDepth > 0)
+            {
+                ContentFrame.BackStack.Clear();
+            }
         }
 
         _ = SaveLastPageAsync(pageKey);

@@ -98,7 +98,7 @@ Get-ChildItem artifacts/publish/win-arm64 | Select-Object Name, Length
 於專案根目錄執行：
 
 ```powershell
-$version = "1.5.5"
+$version = "1.5.7"
 $stage = "artifacts/stage"
 
 foreach ($rid in @("win-x64", "win-arm64")) {
@@ -133,9 +133,9 @@ CourseRec-<版本>-win-arm64-framework-dependent.zip
 版本集中於 `Directory.Build.props`：
 
 ```xml
-<Version>1.5.5</Version>
+<Version>1.5.7</Version>
 <AssemblyVersion>1.5.0.0</AssemblyVersion>
-<FileVersion>1.5.5.0</FileVersion>
+<FileVersion>1.5.7.0</FileVersion>
 ```
 
 規則：
@@ -143,7 +143,7 @@ CourseRec-<版本>-win-arm64-framework-dependent.zip
 - `Version` 採 `主.次.修`。
 - 功能變更遞增版本；`AssemblyVersion` 僅主次版變更時調整。
 - 同步更新 `CHANGELOG.md`、`RELEASE_NOTES.md` 與 `docs/DEV_LOG.md`。
-- Git tag 使用 `v<版本>`，例如 `v1.5.5`。
+- Git tag 使用 `v<版本>`，例如 `v1.5.7`。
 
 ---
 
@@ -155,24 +155,24 @@ git status
 git log --oneline -5
 
 # 建立並推送標籤
-git tag v1.5.5
+git tag v1.5.7
 git push origin main
-git push origin v1.5.5
+git push origin v1.5.7
 
 # 建立 Release 並上傳資產
-gh release create v1.5.5 `
-  artifacts/CourseRec-1.5.5-win-x64-framework-dependent.zip `
-  artifacts/CourseRec-1.5.5-win-arm64-framework-dependent.zip `
-  --title "CourseRec v1.5.5" `
+gh release create v1.5.7 `
+  artifacts/CourseRec-1.5.7-win-x64-framework-dependent.zip `
+  artifacts/CourseRec-1.5.7-win-arm64-framework-dependent.zip `
+  --title "CourseRec v1.5.7" `
   --notes-file RELEASE_NOTES.md
 ```
 
 若 Release 已存在，改用：
 
 ```powershell
-gh release upload v1.5.5 `
-  artifacts/CourseRec-1.5.5-win-x64-framework-dependent.zip `
-  artifacts/CourseRec-1.5.5-win-arm64-framework-dependent.zip `
+gh release upload v1.5.7 `
+  artifacts/CourseRec-1.5.7-win-x64-framework-dependent.zip `
+  artifacts/CourseRec-1.5.7-win-arm64-framework-dependent.zip `
   --clobber
 ```
 

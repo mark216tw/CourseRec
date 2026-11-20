@@ -54,7 +54,7 @@
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 
-            <Frame x:Name="ContentFrame">
+            <Frame x:Name="ContentFrame" CacheSize="0">
                 <ProgressRing
                     Width="32"
                     Height="32"

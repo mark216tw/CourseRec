@@ -170,10 +170,95 @@ public sealed class RecorderReliabilityTests : IDisposable
         await recorder.StopRecordingAsync();
     }
 
-    private async Task<RecorderViewModel> CreateRecorderAsync(FaultingEncoder encoder)
+    [Fact]
+    public async Task CountdownOverlay_ShowsDescendingNumbersAndHidesBeforeRecordingStarts()
+    {
+        using var encoder = new FaultingEncoder();
+        var overlay = new FakeCountdownOverlayService();
+        using RecorderViewModel recorder = await CreateRecorderAsync(encoder, countdownSeconds: 3, countdownOverlay: overlay);
+
+        await recorder.StartRecordingCommand.ExecuteAsync(null);
+
+        Assert.Equal([3, 2, 1], overlay.ShownSeconds);
+        Assert.True(overlay.HideCount >= 1);
+        Assert.Equal(RecordingState.Recording, recorder.State);
+
+        await recorder.StopRecordingAsync();
+    }
+
+    [Fact]
+    public async Task CountdownOverlay_ZeroCountdown_NeverShowsOverlay()
+    {
+        using var encoder = new FaultingEncoder();
+        var overlay = new FakeCountdownOverlayService();
+        using RecorderViewModel recorder = await CreateRecorderAsync(encoder, countdownSeconds: 0, countdownOverlay: overlay);
+
+        await recorder.StartRecordingCommand.ExecuteAsync(null);
+
+        Assert.Empty(overlay.ShownSeconds);
+        Assert.Equal(RecordingState.Recording, recorder.State);
+
+        await recorder.StopRecordingAsync();
+    }
+
+    [Fact]
+    public async Task CountdownOverlay_CancelDuringCountdown_HidesOverlayImmediately()
+    {
+        using var encoder = new FaultingEncoder();
+        var overlay = new FakeCountdownOverlayService();
+        using RecorderViewModel recorder = await CreateRecorderAsync(encoder, countdownSeconds: 5, countdownOverlay: overlay);
+
+        Task startTask = recorder.StartRecordingCommand.ExecuteAsync(null);
+        await Task.Delay(50);
+        await recorder.StopRecordingAsync();
+        await startTask.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.NotEmpty(overlay.ShownSeconds);
+        Assert.Equal(5, overlay.ShownSeconds[0]);
+        Assert.True(overlay.HideCount >= 1);
+        Assert.Equal(RecordingState.Idle, recorder.State);
+    }
+
+    [Fact]
+    public void CountdownOverlayBoundsHelper_CentersAndClampsWithinWorkArea()
+    {
+        (int left, int top) = CountdownOverlayBoundsHelper.CalculateCenteredPosition(
+            targetX: 0,
+            targetY: 0,
+            targetWidth: 1920,
+            targetHeight: 1040,
+            overlayWidth: 264,
+            overlayHeight: 264,
+            workAreaX: 0,
+            workAreaY: 0,
+            workAreaWidth: 1920,
+            workAreaHeight: 1040);
+        Assert.Equal(828, left);
+        Assert.Equal(388, top);
+
+        // 目標視窗部分超出多螢幕左側負座標工作區時，應夾限在工作區內。
+        (int clampedLeft, int clampedTop) = CountdownOverlayBoundsHelper.CalculateCenteredPosition(
+            targetX: -2000,
+            targetY: -100,
+            targetWidth: 300,
+            targetHeight: 300,
+            overlayWidth: 264,
+            overlayHeight: 264,
+            workAreaX: -1920,
+            workAreaY: 0,
+            workAreaWidth: 1920,
+            workAreaHeight: 1040);
+        Assert.Equal(-1920, clampedLeft);
+        Assert.Equal(0, clampedTop);
+    }
+
+    private async Task<RecorderViewModel> CreateRecorderAsync(
+        FaultingEncoder encoder,
+        int countdownSeconds = 0,
+        ICountdownOverlayService? countdownOverlay = null)
     {
         var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"), new CourseRecDefaultOptions(), NullLogger<SettingsService>.Instance);
-        await settings.SaveAsync(new AppSettings { OutputDirectory = _tempDir, RecordingCountdownSeconds = 0 });
+        await settings.SaveAsync(new AppSettings { OutputDirectory = _tempDir, RecordingCountdownSeconds = countdownSeconds });
         var navigation = new NavigationCoordinator();
         var localization = new LocalizationService();
         return new RecorderViewModel(new CaptureEnumerationService(), new FakeScreenCapture(),
@@ -181,7 +266,8 @@ public sealed class RecorderReliabilityTests : IDisposable
             new BookmarkService(NullLogger<BookmarkService>.Instance), settings,
             new GlobalHotkeyService(NullLogger<GlobalHotkeyService>.Instance),
             new MainViewModel(navigation, localization), localization, NullLogger<RecorderViewModel>.Instance, navigation,
-            new TaskbarIndicatorService(localization, NullLogger<TaskbarIndicatorService>.Instance))
+            new TaskbarIndicatorService(localization, NullLogger<TaskbarIndicatorService>.Instance),
+            countdownOverlay ?? new FakeCountdownOverlayService())
         {
             SelectedTarget = new CaptureTarget("test", CaptureTargetKind.Monitor, "test", "test", 0, 0, 320, 240),
         };
@@ -261,5 +347,23 @@ public sealed class RecorderReliabilityTests : IDisposable
         public CapturedFrameData? GetLatestFrameSnapshot() => null;
         public Task<string?> SaveSnapshotPngAsync(string directory, bool copyToClipboard = true, CancellationToken cancellationToken = default) => Task.FromResult<string?>(null);
         public void Dispose() { }
+    }
+
+    private sealed class FakeCountdownOverlayService : ICountdownOverlayService
+    {
+        public List<int> ShownSeconds { get; } = [];
+        public CaptureTarget? LastTarget { get; private set; }
+        public int HideCount { get; private set; }
+
+        public void ShowOrUpdate(int remainingSeconds, CaptureTarget? target)
+        {
+            ShownSeconds.Add(remainingSeconds);
+            LastTarget = target;
+        }
+
+        public void Hide()
+        {
+            HideCount++;
+        }
     }
 }

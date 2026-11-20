@@ -35,12 +35,15 @@ public sealed class AudioCaptureService : IAudioCaptureService
         {
             if (_isBufferingForEncoding != value)
             {
+                _isBufferingForEncoding = value;
                 if (value)
                 {
                     _mixer.ResetBuffers();
                 }
-
-                _isBufferingForEncoding = value;
+                else
+                {
+                    _mixer.ReleaseBuffers();
+                }
             }
         }
     }
@@ -115,7 +118,7 @@ public sealed class AudioCaptureService : IAudioCaptureService
 
         if (cts is null)
         {
-            _mixer.ResetBuffers();
+            _mixer.ReleaseBuffers();
             PublishStatus(new AudioCaptureStatus(SystemAudioSource.Inactive, null, false, false));
             return;
         }
@@ -148,7 +151,7 @@ public sealed class AudioCaptureService : IAudioCaptureService
         }
         finally
         {
-            _mixer.ResetBuffers();
+            _mixer.ReleaseBuffers();
             PublishStatus(new AudioCaptureStatus(SystemAudioSource.Inactive, null, false, false));
 
             if (completed)
@@ -207,8 +210,8 @@ public sealed class AudioCaptureService : IAudioCaptureService
         int micBits = 32;
         string? activeCaptureId = null;
 
-        var rawSamples = new List<float>(4800);
-        float[] conversionBuffer = new float[96_000];
+        var rawSamples = new List<float>(2048);
+        float[] conversionBuffer = [];
         long lastEndpointCheckMs = Environment.TickCount64;
         long lastUiMeterPublishMs = 0;
 

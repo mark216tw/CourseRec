@@ -187,6 +187,23 @@ public sealed class ScreenCaptureService : IScreenCaptureService
         }
     }
 
+    public void ReleaseIdleResources()
+    {
+        lock (_lifecycleLock)
+        {
+            if (_session is not null)
+            {
+                return;
+            }
+
+            lock (_frameLock)
+            {
+                ReleaseIdleBuffersLocked();
+                ReleaseGraphicsDeviceLocked();
+            }
+        }
+    }
+
     private void StopCaptureCore()
     {
         _minimizedCheckTimer?.Dispose();
@@ -210,6 +227,10 @@ public sealed class ScreenCaptureService : IScreenCaptureService
             _latestFrame?.Dispose();
             _latestFrame = null;
             Interlocked.Exchange(ref _lastReadbackTimestamp, 0);
+            D3D11NativeMethods.ReleaseCom(ref _stagingTexture);
+            _stagingWidth = 0;
+            _stagingHeight = 0;
+            ReleaseIdleBuffersLocked();
         }
 
         if (pool is not null)
@@ -222,6 +243,25 @@ public sealed class ScreenCaptureService : IScreenCaptureService
 
         ActiveTarget = null;
         UpdateMinimizedState(false);
+    }
+
+    private void ReleaseIdleBuffersLocked()
+    {
+        for (int i = 0; i < _ringPixelBuffers.Length; i++)
+        {
+            if (Volatile.Read(ref _ringSlotInUse[i]) == 0)
+            {
+                _ringPixelBuffers[i] = [];
+            }
+        }
+
+        for (int i = 0; i < _previewPixelBuffers.Length; i++)
+        {
+            if (Volatile.Read(ref _previewSlotInUse[i]) == 0)
+            {
+                _previewPixelBuffers[i] = [];
+            }
+        }
     }
 
     public CapturedFrameData? GetLatestFrameSnapshot()
@@ -407,7 +447,7 @@ public sealed class ScreenCaptureService : IScreenCaptureService
                             int leasedSlot = nextSlot;
                             captured = new CapturedFrameData(
                                 _ringPixelBuffers[nextSlot], width, height, frame.SystemRelativeTime.Ticks,
-                                () => Interlocked.Exchange(ref _ringSlotInUse[leasedSlot], 0));
+                                () => ReleaseRingSlot(leasedSlot));
                             _ringSlotIndex = nextSlot;
                             Interlocked.Exchange(ref _lastReadbackTimestamp, nowTimestamp);
                             _latestFrame?.Dispose();
@@ -532,12 +572,13 @@ public sealed class ScreenCaptureService : IScreenCaptureService
         CapturedFrameData preview;
         try
         {
+            int leasedPreviewSlot = nextSlot;
             preview = new CapturedFrameData(
                 buffer,
                 targetWidth,
                 targetHeight,
                 captured.SystemRelativeTicks,
-                () => Interlocked.Exchange(ref _previewSlotInUse[nextSlot], 0));
+                () => ReleasePreviewSlot(leasedPreviewSlot));
         }
         catch
         {
@@ -623,6 +664,36 @@ public sealed class ScreenCaptureService : IScreenCaptureService
         finally
         {
             Volatile.Write(ref _recoveryScheduled, 0);
+        }
+    }
+
+    private void ReleaseRingSlot(int slotIndex)
+    {
+        Interlocked.Exchange(ref _ringSlotInUse[slotIndex], 0);
+        if (_session is null)
+        {
+            lock (_frameLock)
+            {
+                if (_session is null && Volatile.Read(ref _ringSlotInUse[slotIndex]) == 0)
+                {
+                    _ringPixelBuffers[slotIndex] = [];
+                }
+            }
+        }
+    }
+
+    private void ReleasePreviewSlot(int slotIndex)
+    {
+        Interlocked.Exchange(ref _previewSlotInUse[slotIndex], 0);
+        if (_session is null)
+        {
+            lock (_frameLock)
+            {
+                if (_session is null && Volatile.Read(ref _previewSlotInUse[slotIndex]) == 0)
+                {
+                    _previewPixelBuffers[slotIndex] = [];
+                }
+            }
         }
     }
 

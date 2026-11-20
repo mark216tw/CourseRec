@@ -30,6 +30,11 @@ public interface IScreenCaptureService : IDisposable
 
     void StopCapture();
 
+    /// <summary>於非擷取待機期間釋放 Direct3D 裝置與暫存影格緩衝區以降低常駐記憶體。</summary>
+    void ReleaseIdleResources()
+    {
+    }
+
     /// <summary>取得最新影格的使用權；呼叫者必須 Dispose。</summary>
     CapturedFrameData? GetLatestFrameSnapshot();
 

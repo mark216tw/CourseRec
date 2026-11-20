@@ -39,6 +39,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
     private readonly RecordingTimelineClock _timelineClock = new();
     private readonly INavigationCoordinator _navigationCoordinator;
     private readonly ITaskbarIndicatorService _taskbarIndicator;
+    private readonly ICountdownOverlayService _countdownOverlayService;
     private readonly ManualResetEventSlim _pumpResumeGate = new(initialState: true);
 
     private DispatcherQueue? _dispatcherQueue;
@@ -155,7 +156,8 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         ILocalizationService localization,
         ILogger<RecorderViewModel> logger,
         INavigationCoordinator navigationCoordinator,
-        ITaskbarIndicatorService taskbarIndicator)
+        ITaskbarIndicatorService taskbarIndicator,
+        ICountdownOverlayService countdownOverlayService)
     {
         _enumerationService = enumerationService;
         _screenCaptureService = screenCaptureService;
@@ -169,6 +171,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         _logger = logger;
         _navigationCoordinator = navigationCoordinator;
         _taskbarIndicator = taskbarIndicator;
+        _countdownOverlayService = countdownOverlayService;
 
         QualityOptions =
         [
@@ -319,10 +322,18 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
             return;
         }
 
+        bool hadActiveCapture = _screenCaptureService.IsCapturing || _audioCaptureService.IsMonitoring;
+        _housekeepingTimer?.Change(Timeout.Infinite, Timeout.Infinite);
         _screenCaptureService.StopCapture();
+        _screenCaptureService.ReleaseIdleResources();
         _ = _audioCaptureService.StopMonitoringAsync();
         SystemMeterPercent = 0;
         MicrophoneMeterPercent = 0;
+
+        if (hadActiveCapture)
+        {
+            MemoryTrimHelper.RequestTrim();
+        }
     }
 
     /// <summary>
@@ -336,6 +347,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         }
 
         StartIdleServices();
+        _housekeepingTimer?.Change(1500, 1500);
         _isIdleCaptureSuspended = false;
         _screenCaptureService.IsPreviewEnabled = IsLivePreviewEnabled;
 
@@ -628,13 +640,26 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
 
         try
         {
+            StartIdleServices();
+            _housekeepingTimer?.Change(1500, 1500);
             SetKeepAwake(true);
             State = RecordingState.Countdown;
             int countdownSeconds = Math.Clamp(_settingsService.Current.RecordingCountdownSeconds, 0, 30);
-            for (int sec = countdownSeconds; sec >= 1; sec--)
+            if (countdownSeconds > 0)
             {
-                StatusBadgeText = _localization.Format("StateCountdownFormat", sec);
-                await Task.Delay(1000, token);
+                try
+                {
+                    for (int sec = countdownSeconds; sec >= 1; sec--)
+                    {
+                        StatusBadgeText = _localization.Format("StateCountdownFormat", sec);
+                        _countdownOverlayService.ShowOrUpdate(sec, SelectedTarget);
+                        await Task.Delay(1000, token);
+                    }
+                }
+                finally
+                {
+                    _countdownOverlayService.Hide();
+                }
             }
 
             QualityPreset preset = SelectedQualityOption?.Value ?? QualityPreset.SlidePresentation;
@@ -748,6 +773,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         if (State == RecordingState.Countdown)
         {
             _recordingSessionCts?.Cancel();
+            _countdownOverlayService.Hide();
             SetKeepAwake(false);
             State = RecordingState.Idle;
             SyncScreenCaptureState();
@@ -838,12 +864,19 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
             _timelineClock.Reset();
             State = RecordingState.Idle;
             SyncScreenCaptureState();
+            if (!_screenCaptureService.IsCapturing)
+            {
+                _screenCaptureService.ReleaseIdleResources();
+            }
+
             if (_isIdleCaptureSuspended)
             {
+                _housekeepingTimer?.Change(Timeout.Infinite, Timeout.Infinite);
                 await _audioCaptureService.StopMonitoringAsync();
             }
 
             UpdateDiskSpaceSummary();
+            MemoryTrimHelper.RequestTrim();
         }
     }
 
@@ -997,6 +1030,7 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         }
 
         _isDisposed = true;
+        _countdownOverlayService.Hide();
         SetKeepAwake(false);
         _housekeepingTimer?.Dispose();
         _pumpResumeGate.Set();
@@ -1128,7 +1162,13 @@ public sealed partial class RecorderViewModel : ObservableObject, IDisposable
         }
         else
         {
+            bool wasCapturing = _screenCaptureService.IsCapturing;
             _screenCaptureService.StopCapture();
+            if (wasCapturing)
+            {
+                _screenCaptureService.ReleaseIdleResources();
+                MemoryTrimHelper.RequestTrim();
+            }
         }
     }
 

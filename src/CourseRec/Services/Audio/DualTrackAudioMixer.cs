@@ -37,7 +37,7 @@ public sealed class DualTrackAudioMixer
             _muteMicrophone = value;
             if (value)
             {
-                _microphoneBuffer.Clear();
+                _microphoneBuffer.ReleaseBuffer();
                 _smoothedMicPeak = 0f;
                 _micClipping = false;
             }
@@ -282,6 +282,12 @@ public sealed class DualTrackAudioMixer
     {
         _systemBuffer.Clear();
         _microphoneBuffer.Clear();
+    }
+
+    public void ReleaseBuffers()
+    {
+        _systemBuffer.ReleaseBuffer();
+        _microphoneBuffer.ReleaseBuffer();
     }
 
     public void DecayMeters()

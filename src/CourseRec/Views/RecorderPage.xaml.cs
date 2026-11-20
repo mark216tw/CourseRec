@@ -153,6 +153,15 @@ public sealed partial class RecorderPage : Page
     private void UpdatePreviewPresentation()
     {
         bool isEnabled = ViewModel.IsLivePreviewEnabled;
+        if (!isEnabled)
+        {
+            Interlocked.Exchange(ref _pendingPreview, null)?.Dispose();
+            PreviewImage.Source = null;
+            _previewStream?.Dispose();
+            _previewStream = null;
+            _previewBitmap = null;
+        }
+
         PreviewImage.Visibility = isEnabled ? Visibility.Visible : Visibility.Collapsed;
         PreviewPlaceholderText.Text = isEnabled
             ? _localization.GetString("RecorderPreviewEmpty")

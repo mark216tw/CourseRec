@@ -14,6 +14,7 @@ public static unsafe class WindowIconHelper
 {
     private const int MaxIconDimension = 128;
     private const int StockIconAttempts = 2;
+    private const int MaxCachedExecutableIcons = 64;
 
     private static readonly object MonitorIconSync = new();
     private static readonly ConcurrentDictionary<string, IconData> _executableIconCache = new(StringComparer.OrdinalIgnoreCase);
@@ -154,6 +155,11 @@ public static unsafe class WindowIconHelper
         IconData? icon = LoadExecutableIcon(executablePath);
         if (icon is not null)
         {
+            if (_executableIconCache.Count >= MaxCachedExecutableIcons)
+            {
+                _executableIconCache.Clear();
+            }
+
             _executableIconCache.TryAdd(executablePath, icon);
         }
 

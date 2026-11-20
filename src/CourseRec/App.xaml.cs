@@ -27,6 +27,7 @@ namespace Com.VibeCode.CourseRec;
 public partial class App : Application
 {
     private readonly IHost _host;
+    private readonly Task<AppSettings> _preloadSettingsTask;
     private CancellationTokenSource? _activationCts;
     private MainWindow? _mainWindow;
     private int _fatalErrorHandled;
@@ -68,6 +69,7 @@ public partial class App : Application
                 services.AddSingleton<IGlobalHotkeyService, GlobalHotkeyService>();
                 services.AddSingleton<ITaskbarIndicatorService, TaskbarIndicatorService>();
                 services.AddSingleton<IMiniOverlayService, MiniOverlayService>();
+                services.AddSingleton<ICountdownOverlayService, CountdownOverlayService>();
 
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<RecorderViewModel>();
@@ -81,10 +83,10 @@ public partial class App : Application
             .Build();
 
         StartupTrace.Mark("主機建置完成");
+        _preloadSettingsTask = _host.Services.GetRequiredService<ISettingsService>().LoadAsync();
         UnhandledException += OnAppUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
-        FlushStartupTrace();
     }
 
     public static T GetService<T>()
@@ -128,12 +130,11 @@ public partial class App : Application
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         StartupTrace.Mark("OnLaunched 開始");
-        await _host.StartAsync();
-        StartupTrace.Mark("主機啟動完成");
-
-        ISettingsService settingsService = GetService<ISettingsService>();
-        AppSettings settings = await settingsService.LoadAsync();
+        Task hostStartTask = _host.StartAsync();
+        AppSettings settings = await _preloadSettingsTask;
         StartupTrace.Mark("設定載入完成");
+        await hostStartTask;
+        StartupTrace.Mark("主機啟動完成");
 
         IThemeService themeService = GetService<IThemeService>();
         themeService.ApplyTheme(settings.DisplayMode, settings.ColorTheme);
@@ -142,7 +143,6 @@ public partial class App : Application
         StartupTrace.Mark("主視窗建構完成");
 
         _mainWindow.BeforeForceStopRecordingAsync = () => GetService<RecorderViewModel>().StopRecordingAsync();
-        GetService<EditorViewModel>().ConfirmDiscardEditsAsync = _mainWindow.ConfirmDiscardEditorChangesAsync;
         _mainWindow.Closed += OnMainWindowClosed;
 
         themeService.RegisterWindow(_mainWindow);
@@ -151,17 +151,36 @@ public partial class App : Application
         _mainWindow.Activate();
         StartupTrace.Mark("視窗 Activate");
 
-        // 視窗顯示後才進行非必要初始化，縮短首次可見時間；頁面導覽同樣延後到下一輪。
+        // 視窗顯示後立即排程初始頁面，其餘非首屏必要服務再於下一輪低優先權初始化。
+        _mainWindow.NavigateToInitialPage(settings.LastPage);
+        if (!_mainWindow.DispatcherQueue.TryEnqueue(
+                Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
+                () => CompletePostLaunchInitialization(settings)))
+        {
+            CompletePostLaunchInitialization(settings);
+        }
+    }
+
+    private void CompletePostLaunchInitialization(AppSettings settings)
+    {
+        if (_mainWindow is null || Volatile.Read(ref _isShuttingDown) != 0)
+        {
+            return;
+        }
+
         RecorderViewModel recorderViewModel = GetService<RecorderViewModel>();
         recorderViewModel.AttachDispatcher(_mainWindow.DispatcherQueue);
-        recorderViewModel.StartIdleServices();
-        if (settings.LastPage != NavigationPageKey.Recorder)
+        _mainWindow.AttachRecorderViewModel(recorderViewModel);
+        if (settings.LastPage == NavigationPageKey.Recorder)
+        {
+            recorderViewModel.StartIdleServices();
+        }
+        else
         {
             recorderViewModel.SuspendIdleCapture();
         }
 
         ClipboardHelper.Initialize(_mainWindow.DispatcherQueue);
-        _mainWindow.NavigateToInitialPage(settings.LastPage);
         GetService<ITaskbarIndicatorService>().AttachWindow(_mainWindow.WindowHandle);
 
         IGlobalHotkeyService hotkeyService = GetService<IGlobalHotkeyService>();
@@ -202,6 +221,15 @@ public partial class App : Application
         catch (Exception ex)
         {
             TryLogFatal(ex, "關閉迷你控制列");
+        }
+
+        try
+        {
+            GetService<ICountdownOverlayService>().Hide();
+        }
+        catch (Exception ex)
+        {
+            TryLogFatal(ex, "關閉倒數計時覆蓋視窗");
         }
 
         try

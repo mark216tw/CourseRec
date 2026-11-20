@@ -4,6 +4,69 @@
 
 ---
 
+## 2026-11-20 - v1.5.7
+
+### 目標
+錄影開始倒數計時時，在 Windows 畫面中央顯示大型倒數數字，提供明確的開錄視覺提示，且不干擾使用者操作目標視窗。
+
+### 變更
+- `Views/CountdownOverlayWindow.xaml`、`Views/CountdownOverlayWindow.xaml.cs`：新增大型倒數覆蓋視窗（264×264 DIP、136pt 粗體倒數數字與每秒彈入動畫），依目標顯示器／目標視窗自動置中並支援多螢幕混合 DPI；設定置頂、不顯示於工作列與切換器（`IsShownInSwitchers = false`）、排除自身入鏡（`WDA_EXCLUDEFROMCAPTURE`）、不搶焦點且穿透滑鼠點擊（`WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_LAYERED | WS_EX_TRANSPARENT` + `AppWindow.Show(false)`）。
+- `Services/ICountdownOverlayService.cs`、`Services/CountdownOverlayService.cs`：集中管理倒數覆蓋視窗生命週期與主題註冊。
+- `Helpers/CountdownOverlayBoundsHelper.cs`：新增置中與工作區邊界夾限計算工具。
+- `Interop/WindowNativeMethods.cs`：新增 `GetWindowLongPtr`、`SetWindowLongPtr`、`SetLayeredWindowAttributes` 與 `TryConfigureNonActivatingClickThrough`（含分層屬性失敗時的安全回退）。
+- `ViewModels/RecorderViewModel.cs`、`App.xaml.cs`：注入 `ICountdownOverlayService`，於倒數每秒更新覆蓋視窗，並於倒數結束、取消、釋放或主視窗關閉時立即關閉。
+- `Styles/SharedStyles.xaml`、`Strings/zh-Hant/Resources.resw`：新增 `FontSizeCountdownNumber`、`CountdownNumberTextStyle` 與倒數覆蓋視窗繁中文案／無障礙名稱。
+- `tests/CourseRec.Tests/RecorderReliabilityTests.cs`：新增倒數遞減顯示與結束隱藏、0 秒不顯示、取消立即隱藏，以及多螢幕置中夾限 4 項單元測試。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.5.7（`AssemblyVersion` 維持 1.5.0.0）。
+- `README.md`、`docs/USER_GUIDE.md`、`docs/BUILD.md`：補充倒數覆蓋視窗功能說明，並將建置與 Release 範例版本更新為 1.5.7。
+
+### 問題與解法
+- `SettingsService` 會將倒數秒數正規化為預設選項（0／3／5／10 等），調整測試以 3 秒驗證 `[3, 2, 1]` 序列。
+- 沙盒內建置與測試無法存取 Windows SDK 登錄機碼，改以非沙盒模式執行驗證。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：68/68 通過。
+- `dotnet publish`（Release、framework-dependent、`WindowsAppSDKSelfContained=true`）：x64 與 ARM64 皆成功，已封裝為 `CourseRec-1.5.7-win-x64-framework-dependent.zip` 與 `CourseRec-1.5.7-win-arm64-framework-dependent.zip`。
+
+### 待辦
+- 尚未於實機多螢幕／不同 DPI 與淺色／深色主題下目視確認倒數覆蓋層的外觀、點擊穿透與不搶焦點手感。
+
+---
+
+## 2026-11-20 - v1.5.6
+
+### 目標
+提高應用程式啟動速度，並降低常駐待機與切換頁面時的電腦記憶體使用量。
+
+### 變更
+- `Helpers/AppJsonSerializerContext.cs`、`Services/Settings/SettingsService.cs`、`Services/Bookmarks/BookmarkService.cs`：新增 `System.Text.Json` 編譯期原始碼產生器上下文（`AppSettings`、`BookmarkDocument`），消除冷啟動與讀寫設定／書籤時的反射與動態 IL 產生開銷。
+- `App.xaml.cs`、`Views/MainWindow.xaml`、`Views/MainWindow.xaml.cs`、`Views/EditorPage.xaml.cs`：
+  - `App` 建構完成後立即於背景預讀設定檔，並與 `_host.StartAsync()` 並行；移除啟動期間預先解析 `EditorViewModel`（改由 `EditorPage` 建構時綁定 `ConfirmDiscardEditsAsync`）。
+  - `MainWindow` 建構子不再強制注入 `RecorderViewModel`，改於視窗 `Activate()` 後的 `DispatcherQueuePriority.Low` 排程掛載，將整個錄影管線依賴樹移出首次顯示關鍵路徑；非錄影頁啟動時不再誤觸發 `StartIdleServices()`。
+  - `ContentFrame` 設定 `CacheSize="0"` 並於每次導覽後清空 `BackStack`，避免歷史項目累積。
+  - 監聽 `AppWindow` 最小化狀態：最小化且非錄影、未開迷你控制列時自動暫停閒置擷取／音訊監控與家務計時器，並於背景修剪 LOH 與閒置工作集；還原視窗時自動恢復。
+- `Services/Audio/AudioRingBuffer.cs`、`Services/Audio/DualTrackAudioMixer.cs`、`Services/Audio/AudioCaptureService.cs`：音訊環形緩衝區改為寫入時延遲配置，並於非錄影緩衝、純聽課靜音或停止監控時透過 `ReleaseBuffer()` 立即釋放（省去常駐 ~4.6 MB LOH）；移除 `RunAudioCaptureLoop` 預先配置的 384 KB 轉換緩衝區。
+- `Services/Capture/IScreenCaptureService.cs`、`Services/Capture/ScreenCaptureService.cs`、`Services/Encoding/Mp4EncoderService.cs`：停止擷取時立即釋放 D3D11 Staging Texture 與閒置影格／預覽緩衝區（含使用中槽位歸還後自動釋放）；新增 `ReleaseIdleResources()` 釋放閒置 D3D11 裝置；`Mp4EncoderService` 改為按需配置縮放緩衝並於封裝後釋放。
+- `Views/RecorderPage.xaml.cs`、`Views/EditorPage.xaml.cs`、`ViewModels/RecorderViewModel.cs`、`Helpers/WindowIconHelper.cs`、`Helpers/MemoryTrimHelper.cs`：
+  - 關閉即時預覽時立即釋放 `WriteableBitmap` 與待處理影格。
+  - 離開編輯器頁面時主動 `SetMediaPlayer(null)` 並 `Dispose()` 原生 `MediaPlayer`。
+  - 暫停閒置擷取時一併暫停 1.5 秒家務計時器；`WindowIconHelper` 執行檔圖示快取加上 64 筆上限；新增節流背景記憶體整理工具 `MemoryTrimHelper`。
+- `tests/CourseRec.Tests/AudioMixerTests.cs`：新增 `AudioRingBuffer_ReleaseBuffer_ClearsAndReallocatesOnNextWrite` 測試。
+- `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`：版本更新至 1.5.6（`AssemblyVersion` 維持 1.5.0.0）。
+
+### 問題與解法
+- 沙盒內執行 `dotnet build`／`dotnet test` 無法讀取 Windows SDK 登錄機碼，改以非沙盒模式完成建置與測試驗證。
+
+### 驗證
+- `dotnet build CourseRec.sln -m:1`：Debug x64 建置成功，0 警告、0 錯誤。
+- `dotnet test tests/CourseRec.Tests/CourseRec.Tests.csproj -p:Platform=x64 --no-build`：64/64 通過。
+
+### 待辦
+- 尚未實際於工作管理員量測冷啟動毫秒數與常駐／最小化前後工作集變化，待使用者實機確認。
+
+---
+
 ## 2026-11-17 - v1.5.5
 
 ### 目標
@@ -15,6 +78,7 @@
 - `Views/MainWindow.xaml.cs`：新增 `SetNavigationPaneVisible`，全螢幕時隱藏側邊導覽列。
 - `Strings/zh-Hant/Resources.resw`：新增退出全螢幕按鈕文字、無障礙名稱與工具提示。
 - `Directory.Build.props`、`CHANGELOG.md`、`RELEASE_NOTES.md`、`docs/BUILD.md`、`docs/USER_GUIDE.md`：版本更新至 1.5.5（`AssemblyVersion` 維持 1.5.0.0）。
+- `RELEASE_NOTES.md`：改為只保留 v1.5.5 的摘要式統整內容，移除 v1.5.4 以前過於瑣碎的逐版說明；GitHub Release body 同步更新。之後新版本再往上累加，`CHANGELOG.md` 仍保留完整歷史。
 
 ### 問題與解法
 - `MediaPlayerElement.IsFullWindow` 依賴 UWP 的 `CoreWindow`／`ApplicationView`，在 WinUI 3 桌面應用不支援且不會拋錯，因此按下按鈕完全沒有反應。
