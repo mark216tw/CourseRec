@@ -8,11 +8,12 @@
     <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
-    <Version>1.5.7</Version>
+    <Version>1.5.8</Version>
     <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.7.0</FileVersion>
+    <FileVersion>1.5.8.0</FileVersion>
     <Company>VibeCode</Company>
     <Product>CourseRec</Product>
+    <AssemblyTitle>CourseRec 錄影快剪</AssemblyTitle>
     <Copyright>Copyright © 2026 VibeCode. All rights reserved.</Copyright>
   </PropertyGroup>
 </Project>

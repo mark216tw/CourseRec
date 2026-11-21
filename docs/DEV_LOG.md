@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-11-21 - v1.5.8
+
+### 目標
+修正未封裝模式下，應用程式釘選到工作列時顯示的名稱（原本顯示組件名稱 `Com.VibeCode.CourseRec`）。
+
+### 變更
+- `Directory.Build.props`：新增 `<AssemblyTitle>CourseRec 錄影快剪</AssemblyTitle>`，對應 exe 版本資源的「檔案描述 FileDescription」，即工作列釘選顯示名稱；版本更新至 1.5.8（`AssemblyVersion` 維持 1.5.0.0）。
+
+### 問題與解法
+- 未設 `AssemblyTitle` 時，.NET SDK 會自動以 `AssemblyName`（`Com.VibeCode.CourseRec`）填入 `AssemblyTitleAttribute`，連帶使 VERSIONINFO 的 FileDescription 變成組件名稱。
+- 未封裝應用釘選工作列時，Explorer 以 FileDescription 去除最後一個點後綴作為捷徑檔名；舊 FileDescription 為 `Com.VibeCode.CourseRec`，故被截成 `Com.VibeCode`。
+- 只改 `AssemblyTitle` 後重新釘選仍顯示舊名，原因是 Explorer 的 `MuiCache`（`HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache`）仍快取舊 FileDescription。清除該 exe 的 `FriendlyAppName`／`ApplicationCompany` 快取值、將既有釘選捷徑改名、並重啟 Explorer 後即恢復正常。
+
+### 處理
+- 已清除 `C:\...\win-CourseRec-01\src\CourseRec\bin\x64\Debug\...\Com.VibeCode.CourseRec.exe` 的 MuiCache 項目。
+- 已將 `%APPDATA%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Com.VibeCode.lnk` 改名為 `CourseRec 錄影快剪.lnk`，並重啟 Explorer 讓工作列重新解析。
+
+### 待辦
+- 若日後改回含點號的 FileDescription（如 `X.Y`），捷徑名稱仍會被截去最後一段，建議維持不含點號的顯示名稱。
+- MSIX 封裝模式名稱由 `Package.appxmanifest` 的 `uap:VisualElements DisplayName`（目前 `CourseRec`）決定，未於本次調整。
+
+---
+
 ## 2026-11-20 - v1.5.7
 
 ### 目標
